@@ -1,14 +1,14 @@
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import xurxodevLogo from "../assets/xurxodev.png";
-import styled from "@emotion/styled";
-import { Button, Menu, MenuItem } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { useAppContext } from "../context/useAppContext";
-import { User } from "../context/AppContext";
+import * as React from 'react';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import xurxodevLogo from '../assets/xurxodev.png';
+import styled from '@emotion/styled';
+import { Button, Menu, MenuItem } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { useAppContext } from '../context/useAppContext';
+import { User } from '../context/AppContext';
 
 export const MainAppBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -40,17 +40,17 @@ export const MainAppBar: React.FC = () => {
           aria-controls="users"
           aria-haspopup="true"
           onClick={handleParentMenuClick}
-          endIcon={anchorEl?.id === "users" ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          endIcon={anchorEl?.id === 'users' ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         >
           {`User: ${currentUser.name}`}
         </MenuButton>
         <Menu
           anchorEl={anchorEl}
           keepMounted
-          open={anchorEl?.id === "users"}
+          open={anchorEl?.id === 'users'}
           onClose={handleClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          transformOrigin={{ vertical: "top", horizontal: "center" }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
           {users.map(user => {
             return (

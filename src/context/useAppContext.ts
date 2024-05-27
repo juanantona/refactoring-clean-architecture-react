@@ -1,11 +1,11 @@
-import { useCallback, useContext } from "react";
-import { AppContext } from "./AppContext";
+import { useCallback, useContext } from 'react';
+import { AppContext } from './AppContext';
 
 export function useAppContext() {
   const context = useContext(AppContext);
 
   if (!context) {
-    throw new Error("App context uninitialized");
+    throw new Error('App context uninitialized');
   }
 
   const { users, currentUser, setCurrentUser } = context;

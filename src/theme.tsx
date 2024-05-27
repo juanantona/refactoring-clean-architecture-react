@@ -1,16 +1,16 @@
-import { createTheme, responsiveFontSizes } from "@mui/material/styles";
-import { red } from "@mui/material/colors";
-import type {} from "@mui/x-data-grid/themeAugmentation";
+import { createTheme, responsiveFontSizes } from '@mui/material/styles';
+import { red } from '@mui/material/colors';
+import type {} from '@mui/x-data-grid/themeAugmentation';
 
 // A custom theme for this app
 const theme = responsiveFontSizes(
   createTheme({
     palette: {
       primary: {
-        main: "#5271FF",
+        main: '#5271FF',
       },
       secondary: {
-        main: "#FFFFFF",
+        main: '#FFFFFF',
       },
       error: {
         main: red.A400,
@@ -23,17 +23,17 @@ const theme = responsiveFontSizes(
       MuiDataGrid: {
         styleOverrides: {
           root: {
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
+            '& .MuiDataGrid-cell:focus': {
+              outline: 'none',
             },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none",
+            '& .MuiDataGrid-cell:focus-within': {
+              outline: 'none',
             },
-            "& .MuiDataGrid-columnHeader:focus": {
-              outline: "none",
+            '& .MuiDataGrid-columnHeader:focus': {
+              outline: 'none',
             },
-            "& .MuiDataGrid-columnHeader:focus-within": {
-              outline: "none",
+            '& .MuiDataGrid-columnHeader:focus-within': {
+              outline: 'none',
             },
           },
         },

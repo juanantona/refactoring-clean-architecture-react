@@ -26,7 +26,7 @@ export class StoreApi {
   private async getProducts(): Promise<RemoteProduct[]> {
     //fakestoreapi is a not real database then we update the cache
     if (this.cache.length === 0) {
-      const products = await fetch("https://fakestoreapi.com/products").then(res => res.json());
+      const products = await fetch('https://fakestoreapi.com/products').then(res => res.json());
       this.cache = products;
       return products;
     } else {

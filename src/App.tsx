@@ -1,5 +1,5 @@
-import { AppProvider } from "./context/AppProvider";
-import { ProductsPage } from "./pages/ProductsPage";
+import { AppProvider } from './context/AppProvider';
+import { ProductsPage } from './pages/ProductsPage';
 
 function App() {
   return (
