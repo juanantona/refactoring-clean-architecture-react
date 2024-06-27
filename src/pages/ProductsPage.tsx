@@ -199,6 +199,7 @@ export const ProductsPage: React.FC = () => {
             },
           }}
           pageSizeOptions={[5, 10]}
+          columnBuffer={6}
         />
       </MainContainer>
       <Footer />
