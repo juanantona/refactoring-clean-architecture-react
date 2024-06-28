@@ -4,21 +4,7 @@ import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 import { AppProvider } from '../context/AppProvider';
 import { ProductsPage } from './ProductsPage';
-import { RemoteProduct } from '../api/StoreApi';
-
-const product: RemoteProduct = {
-  id: 1001,
-  title: 'Mens Cotton Jacket',
-  price: 55.99,
-  description:
-    'great outerwear jackets for Spring/Autumn/Winter, suitable for many occasions, such as working, hiking, camping, mountain/rock climbing, cycling, traveling or other outdoors. Good gift choice for you or your family member. A warm hearted love to Father, husband or son in this thanksgiving or Christmas Day.',
-  category: "men's clothing",
-  image: 'https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_.jpg',
-  rating: {
-    rate: 4.7,
-    count: 500,
-  },
-};
+import { StoreApi } from '../api/StoreApi';
 
 function buildProduct(remoteProduct: RemoteProduct): Product {
   return {
@@ -32,34 +18,63 @@ function buildProduct(remoteProduct: RemoteProduct): Product {
   };
 }
 
-describe('#ProductsPage', () => {
-  const mockFetch = jest.fn();
-  const mockJsonResult = jest.fn();
-  global.fetch = mockFetch.mockResolvedValue({ json: mockJsonResult });
+const oneProduct = ({ price = 1 }) => {
+  const remoteProduct = {
+    id: 1001,
+    title: 'Mens Cotton Jacket',
+    price,
+    description:
+      'great outerwear jackets for Spring/Autumn/Winter, suitable for many occasions, such as working, hiking, camping, mountain/rock climbing, cycling, traveling or other outdoors. Good gift choice for you or your family member. A warm hearted love to Father, husband or son in this thanksgiving or Christmas Day.',
+    category: "men's clothing",
+    image: 'https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_.jpg',
+    rating: {
+      rate: 4.7,
+      count: 500,
+    },
+  };
 
-  it('Should showcase product id, title, price, image and status regarding the price', async () => {
-    const builtProduct = buildProduct(product);
-    const promise = Promise.resolve([builtProduct]);
-    mockJsonResult.mockResolvedValue(promise);
+  return buildProduct(remoteProduct);
+};
+
+describe('#ProductsPage', () => {
+  const getAllSpy = jest.spyOn(StoreApi.prototype, 'getAll');
+
+  it('Should showcase product id, title, price and image attributes', async () => {
+    const product = oneProduct({ price: 55.99 });
+    getAllSpy.mockResolvedValueOnce([product]);
 
     render(<ProductsPage />, { wrapper: AppProvider });
-    await act(async () => await promise);
+    await act(async () => await getAllSpy.mock.results[0].value);
 
-    expect(screen.getByText(/Mens Cotton Jacket/i)).toBeInTheDocument();
-    expect(screen.getByText(/1001/i)).toBeInTheDocument();
+    expect(getAllSpy).toHaveBeenCalled();
+
+    expect(screen.getByText(new RegExp(`${product.id}`, 'i'))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${product.title}`, 'i'))).toBeInTheDocument();
+    const images = screen.queryAllByRole('img');
+    const productImage = images.find(img => img.src === product.image);
+    expect(productImage).toBeInTheDocument();
     expect(screen.getByText(/55.99/i)).toBeInTheDocument();
     expect(screen.getByText(/active/i)).toBeInTheDocument();
   });
 
-  it('Should showcase the Update price modal when click in the actions button', async () => {
-    const builtProduct = buildProduct(product);
-    const promise = Promise.resolve([builtProduct]);
-    mockJsonResult.mockResolvedValue(promise);
+  it('Should showcase status inactive if the price is 0', async () => {
+    const product = oneProduct({ price: 0 });
+    getAllSpy.mockResolvedValueOnce([product]);
 
     render(<ProductsPage />, { wrapper: AppProvider });
-    await act(async () => await promise);
+    await act(async () => await getAllSpy.mock.results[0].value);
 
-    expect(mockFetch).toHaveBeenCalledWith('https://fakestoreapi.com/products');
+    expect(screen.getByText(/inactive/i)).toBeInTheDocument();
+  });
+
+  it('Should showcase the Update price modal when click in the actions button', async () => {
+    const product = oneProduct({});
+    getAllSpy.mockResolvedValueOnce([product]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllSpy.mock.results[0].value);
+
+    expect(getAllSpy).toHaveBeenCalled();
 
     const actionsButton = screen.getByTestId('MoreVertIcon');
     fireEvent.click(actionsButton);
