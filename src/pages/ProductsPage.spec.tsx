@@ -96,4 +96,27 @@ describe('#ProductsPage', () => {
     expect(screen.queryByText('Admin user')).toBeVisible();
     expect(screen.queryByText('Non admin user')).toBeVisible();
   });
+
+  it("Shouldn't allow to update the product price if the user is Non Admin", async () => {
+    const product = oneProduct({});
+    getAllSpy.mockResolvedValueOnce([product]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllSpy.mock.results[0].value);
+
+    const buttons = screen.getAllByRole('button');
+    const usersButton = buttons.find(btn => btn.id === 'users');
+    if (usersButton) fireEvent.click(usersButton);
+    expect(screen.getByText('Non admin user')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Non admin user'));
+    expect(screen.getByText('User: Non admin user')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('MoreVertIcon'));
+    expect(screen.getByText('Update price')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update price'));
+    expect(
+      screen.getByText('Only admin users can edit the price of a product')
+    ).toBeInTheDocument();
+  });
 });
