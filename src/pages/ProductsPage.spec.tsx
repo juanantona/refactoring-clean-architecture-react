@@ -78,6 +78,22 @@ describe('#ProductsPage', () => {
 
     const actionsButton = screen.getByTestId('MoreVertIcon');
     fireEvent.click(actionsButton);
-    await waitFor(() => screen.getByText(/Update price/i));
+    expect(screen.getByText(/Update price/i)).toBeInTheDocument();
+  });
+
+  it('Should showcase user modal when clicking in the User button', async () => {
+    getAllSpy.mockResolvedValueOnce([]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllSpy.mock.results[0].value);
+
+    expect(screen.queryByText('Admin user')).not.toBeVisible();
+    expect(screen.queryByText('Non admin user')).not.toBeVisible();
+
+    const buttons = screen.getAllByRole('button');
+    const usersButton = buttons.find(btn => btn.id === 'users');
+    if (usersButton) fireEvent.click(usersButton);
+    expect(screen.queryByText('Admin user')).toBeVisible();
+    expect(screen.queryByText('Non admin user')).toBeVisible();
   });
 });
