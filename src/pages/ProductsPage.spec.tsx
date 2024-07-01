@@ -38,6 +38,7 @@ const oneProduct = ({ price = 1 }) => {
 
 describe('#ProductsPage', () => {
   const getAllSpy = jest.spyOn(StoreApi.prototype, 'getAll');
+  const postSpy = jest.spyOn(StoreApi.prototype, 'post');
 
   it('Should showcase product id, title, price and image attributes', async () => {
     const product = oneProduct({ price: 55.99 });
@@ -118,5 +119,27 @@ describe('#ProductsPage', () => {
     expect(
       screen.getByText('Only admin users can edit the price of a product')
     ).toBeInTheDocument();
+  });
+
+  it('Should allow to update the product price if the user is Admin', async () => {
+    const product = oneProduct({ price: 55.99 });
+    getAllSpy.mockResolvedValueOnce([product]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllSpy.mock.results[0].value);
+
+    expect(screen.getByText('User: Admin user')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('MoreVertIcon'));
+    expect(screen.getByText('Update price')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update price'));
+    waitFor(() => {
+      expect(screen.getByText('Save')).toBeVisible();
+      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10' } });
+      fireEvent.click(screen.getByText('Save'));
+      expect(postSpy).toHaveBeenCalledWith({ ...product, price: 10 });
+      expect(screen.getByText(`Price 10 for '${product.title}' updated`)).toBeInTheDocument();
+    });
   });
 });
