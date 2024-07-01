@@ -152,14 +152,34 @@ describe('#ProductsPage', () => {
     fireEvent.click(screen.getByText('Update price'));
     waitFor(() => {
       expect(screen.getByText('Save')).toBeVisible();
-      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: 'AA' } });
+      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10.5kkk' } });
       fireEvent.click(screen.getByText('Save'));
       expect(postProductSpy).not.toHaveBeenCalled();
       expect(screen.getByText('Only numbers are allowed')).toBeInTheDocument();
     });
   });
 
-  it("Shouldn't allow to update the product price with number avobe 999.99", async () => {
+  it("Shouldn't allow to update the product price with non valid formatted numbers", async () => {
+    const product = oneProduct({ price: 55.99 });
+    getAllProductsSpy.mockResolvedValueOnce([product]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllProductsSpy.mock.results[0].value);
+
+    fireEvent.click(screen.getByTestId('MoreVertIcon'));
+    expect(screen.getByText('Update price')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update price'));
+    waitFor(() => {
+      expect(screen.getByText('Save')).toBeVisible();
+      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10.' } });
+      fireEvent.click(screen.getByText('Save'));
+      expect(postProductSpy).not.toHaveBeenCalled();
+      expect(screen.getByText('Invalid price format')).toBeInTheDocument();
+    });
+  });
+
+  it("Shouldn't allow to update the product price with a number bigger than 999.99", async () => {
     const product = oneProduct({ price: 55.99 });
     getAllProductsSpy.mockResolvedValueOnce([product]);
 
