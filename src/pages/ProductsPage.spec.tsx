@@ -128,6 +128,46 @@ describe('#ProductsPage', () => {
     ).toBeInTheDocument();
   });
 
+  it("Shouldn't allow to update the product price with no numbers", async () => {
+    const product = oneProduct({ price: 55.99 });
+    getAllSpy.mockResolvedValueOnce([product]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllSpy.mock.results[0].value);
+
+    fireEvent.click(screen.getByTestId('MoreVertIcon'));
+    expect(screen.getByText('Update price')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update price'));
+    waitFor(() => {
+      expect(screen.getByText('Save')).toBeVisible();
+      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: 'AA' } });
+      fireEvent.click(screen.getByText('Save'));
+      expect(postSpy).not.toHaveBeenCalled();
+      expect(screen.getByText('Only numbers are allowed')).toBeInTheDocument();
+    });
+  });
+
+  it("Shouldn't allow to update the product price with number avobe 999.99", async () => {
+    const product = oneProduct({ price: 55.99 });
+    getAllSpy.mockResolvedValueOnce([product]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllSpy.mock.results[0].value);
+
+    fireEvent.click(screen.getByTestId('MoreVertIcon'));
+    expect(screen.getByText('Update price')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update price'));
+    waitFor(() => {
+      expect(screen.getByText('Save')).toBeVisible();
+      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '1000' } });
+      fireEvent.click(screen.getByText('Save'));
+      expect(postSpy).not.toHaveBeenCalled();
+      expect(screen.getByText('The max possible price is 999.99')).toBeInTheDocument();
+    });
+  });
+
   it('Should allow to update the product price if the user is Admin', async () => {
     const product = oneProduct({ price: 55.99 });
     getAllSpy.mockResolvedValueOnce([product]);
