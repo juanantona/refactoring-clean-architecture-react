@@ -79,6 +79,15 @@ describe('#ProductsPage', () => {
     expect(screen.getByText('inactive').closest('div')).toHaveStyle({ background: 'red' });
   });
 
+  it('Should have an Admin user as default when the component loads', async () => {
+    getAllProductsSpy.mockResolvedValueOnce([]);
+
+    render(<ProductsPage />, { wrapper: AppProvider });
+    await act(async () => await getAllProductsSpy.mock.results[0].value);
+
+    expect(screen.queryByText('User: Admin user')).toBeInTheDocument();
+  });
+
   it('Should showcase user modal when clicking in the User button', async () => {
     getAllProductsSpy.mockResolvedValueOnce([]);
 
