@@ -11,7 +11,7 @@ import styled from '@emotion/styled';
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { ToastNotification } from '../components/ToastNotification';
+import { type Notification, ToastNotification } from '../components/ToastNotification';
 import { useReload } from '../hooks/useReload';
 import { RemoteProduct, StoreApi } from '../api/StoreApi';
 
@@ -27,8 +27,7 @@ export const ProductsPage: React.FC = () => {
   const [reloadKey, reload] = useReload();
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [notificationMessage, setNotificationMessage] = useState<string>('');
-  const [isUpdatingError, setUpdatingIsError] = useState<boolean>(false);
+  const [notification, setNotification] = useState<Notification>({ isError: false });
 
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [priceError, setPriceError] = useState<string | undefined>(undefined);
@@ -49,8 +48,10 @@ export const ProductsPage: React.FC = () => {
     async (id: number) => {
       if (id) {
         if (!currentUser.isAdmin) {
-          setNotificationMessage('Only admin users can edit the price of a product');
-          setUpdatingIsError(true);
+          setNotification({
+            message: 'Only admin users can edit the price of a product',
+            isError: true,
+          });
           return;
         }
 
@@ -61,8 +62,7 @@ export const ProductsPage: React.FC = () => {
             setEditingProduct(product);
           })
           .catch(() => {
-            setNotificationMessage(`Product with id ${id} not found`);
-            setUpdatingIsError(true);
+            setNotification({ message: `Product with id ${id} not found`, isError: true });
           });
       }
     },
@@ -106,16 +106,17 @@ export const ProductsPage: React.FC = () => {
       try {
         await storeApi.post(editedRemoteProduct);
 
-        setNotificationMessage(
-          `Price ${editingProduct.price} for '${editingProduct.title}' updated`
-        );
+        setNotification({
+          message: `Price ${editingProduct.price} for '${editingProduct.title}' updated`,
+          isError: false,
+        });
         setEditingProduct(undefined);
         reload();
       } catch (error) {
-        setNotificationMessage(
-          `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`
-        );
-        setUpdatingIsError(true);
+        setNotification({
+          message: `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`,
+          isError: true,
+        });
         setEditingProduct(undefined);
         reload();
       }
@@ -211,12 +212,8 @@ export const ProductsPage: React.FC = () => {
       <Footer />
 
       <ToastNotification
-        onClose={() => {
-          setNotificationMessage('');
-          setUpdatingIsError(false);
-        }}
-        message={notificationMessage}
-        severity={isUpdatingError ? 'error' : 'success'}
+        onClose={() => setNotification({ message: '', isError: false })}
+        notification={notification}
       />
 
       {editingProduct && (
