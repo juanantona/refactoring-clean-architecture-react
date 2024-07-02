@@ -1,4 +1,4 @@
-import { Alert, Box, Container, Snackbar, Stack, TextField, Typography } from '@mui/material';
+import { Box, Container, Stack, TextField, Typography } from '@mui/material';
 import {
   DataGrid,
   GridActionsCellItem,
@@ -11,6 +11,7 @@ import styled from '@emotion/styled';
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { ToastNotification } from '../components/ToastNotification';
 import { useReload } from '../hooks/useReload';
 import { RemoteProduct, StoreApi } from '../api/StoreApi';
 
@@ -26,8 +27,8 @@ export const ProductsPage: React.FC = () => {
   const [reloadKey, reload] = useReload();
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [snackBarError, setSnackBarError] = useState<string>();
-  const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
+  const [notificationMessage, setNotificationMessage] = useState<string>('');
+  const [isUpdatingError, setUpdatingIsError] = useState<boolean>(false);
 
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [priceError, setPriceError] = useState<string | undefined>(undefined);
@@ -48,7 +49,8 @@ export const ProductsPage: React.FC = () => {
     async (id: number) => {
       if (id) {
         if (!currentUser.isAdmin) {
-          setSnackBarError('Only admin users can edit the price of a product');
+          setNotificationMessage('Only admin users can edit the price of a product');
+          setUpdatingIsError(true);
           return;
         }
 
@@ -59,7 +61,8 @@ export const ProductsPage: React.FC = () => {
             setEditingProduct(product);
           })
           .catch(() => {
-            setSnackBarError(`Product with id ${id} not found`);
+            setNotificationMessage(`Product with id ${id} not found`);
+            setUpdatingIsError(true);
           });
       }
     },
@@ -103,13 +106,16 @@ export const ProductsPage: React.FC = () => {
       try {
         await storeApi.post(editedRemoteProduct);
 
-        setSnackBarSuccess(`Price ${editingProduct.price} for '${editingProduct.title}' updated`);
+        setNotificationMessage(
+          `Price ${editingProduct.price} for '${editingProduct.title}' updated`
+        );
         setEditingProduct(undefined);
         reload();
       } catch (error) {
-        setSnackBarSuccess(
+        setNotificationMessage(
           `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`
         );
+        setUpdatingIsError(true);
         setEditingProduct(undefined);
         reload();
       }
@@ -204,23 +210,14 @@ export const ProductsPage: React.FC = () => {
       </MainContainer>
       <Footer />
 
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={snackBarError !== undefined}
-        autoHideDuration={2000}
-        onClose={() => setSnackBarError(undefined)}
-      >
-        <Alert severity="error">{snackBarError}</Alert>
-      </Snackbar>
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={snackBarSuccess !== undefined}
-        autoHideDuration={2000}
-        onClose={() => setSnackBarSuccess(undefined)}
-      >
-        <Alert severity="success">{snackBarSuccess}</Alert>
-      </Snackbar>
+      <ToastNotification
+        onClose={() => {
+          setNotificationMessage('');
+          setUpdatingIsError(false);
+        }}
+        message={notificationMessage}
+        severity={isUpdatingError ? 'error' : 'success'}
+      />
 
       {editingProduct && (
         <ConfirmationDialog
