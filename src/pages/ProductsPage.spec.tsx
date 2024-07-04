@@ -59,7 +59,7 @@ describe('#ProductsPage', () => {
     render(<ProductsPage />, { wrapper: AppProvider });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
-    expect(screen.getByText(/40.10/i)).toBeInTheDocument();
+    expect(screen.getByText('$40.10')).toBeInTheDocument();
   });
 
   it('Should showcase status active if the price is bigger than 0', async () => {
@@ -239,6 +239,6 @@ describe('#ProductsPage', () => {
 
     expect(postProductSpy).toHaveBeenCalledWith({ ...product, price: 10 });
     expect(screen.getByText(`Price 10 for '${product.title}' updated`)).toBeInTheDocument();
-    expect(screen.getByText(/10.00/i)).toBeInTheDocument();
+    expect(screen.getByText('$10.00')).toBeInTheDocument();
   });
 });
