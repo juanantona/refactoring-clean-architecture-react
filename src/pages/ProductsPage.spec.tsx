@@ -23,6 +23,11 @@ const oneProduct = ({ price = 1 }) => ({
 describe('#ProductsPage', () => {
   const getAllProductsSpy = jest.spyOn(StoreApi.prototype, 'getAll');
   const postProductSpy = jest.spyOn(StoreApi.prototype, 'post');
+  const getProductSpy = jest.spyOn(StoreApi.prototype, 'get');
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('Should retrieve products from API when the oponent loads', async () => {
     getAllProductsSpy.mockResolvedValueOnce([]);
@@ -142,83 +147,98 @@ describe('#ProductsPage', () => {
   it("Shouldn't allow to update the product price with no numbers", async () => {
     const product = oneProduct({ price: 55.99 });
     getAllProductsSpy.mockResolvedValueOnce([product]);
+    getProductSpy.mockResolvedValueOnce(product);
 
     render(<ProductsPage />, { wrapper: AppProvider });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
+
+    expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('MoreVertIcon'));
     expect(screen.getByText('Update price')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Update price'));
-    waitFor(() => {
-      expect(screen.getByText('Save')).toBeVisible();
-      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10.5kkk' } });
-      fireEvent.click(screen.getByText('Save'));
-      expect(postProductSpy).not.toHaveBeenCalled();
-      expect(screen.getByText('Only numbers are allowed')).toBeInTheDocument();
-    });
+    await act(async () => await getProductSpy.mock.results[0].value);
+    expect(screen.getByText('Save')).toBeVisible();
+
+    fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10.5kkk' } });
+    fireEvent.click(screen.getByText('Save'));
+    expect(postProductSpy).not.toHaveBeenCalled();
+    expect(screen.getByText('Only numbers are allowed')).toBeInTheDocument();
   });
 
   it("Shouldn't allow to update the product price with non valid formatted numbers", async () => {
     const product = oneProduct({ price: 55.99 });
     getAllProductsSpy.mockResolvedValueOnce([product]);
+    getProductSpy.mockResolvedValueOnce(product);
 
     render(<ProductsPage />, { wrapper: AppProvider });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
+
+    expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('MoreVertIcon'));
     expect(screen.getByText('Update price')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Update price'));
-    waitFor(() => {
-      expect(screen.getByText('Save')).toBeVisible();
-      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10.' } });
-      fireEvent.click(screen.getByText('Save'));
-      expect(postProductSpy).not.toHaveBeenCalled();
-      expect(screen.getByText('Invalid price format')).toBeInTheDocument();
-    });
+    await act(async () => await getProductSpy.mock.results[0].value);
+    expect(screen.getByText('Save')).toBeVisible();
+
+    fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10.' } });
+    fireEvent.click(screen.getByText('Save'));
+    expect(postProductSpy).not.toHaveBeenCalled();
+    expect(screen.getByText('Invalid price format')).toBeInTheDocument();
   });
 
   it("Shouldn't allow to update the product price with a number bigger than 999.99", async () => {
     const product = oneProduct({ price: 55.99 });
     getAllProductsSpy.mockResolvedValueOnce([product]);
+    getProductSpy.mockResolvedValueOnce(product);
 
     render(<ProductsPage />, { wrapper: AppProvider });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
+
+    expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('MoreVertIcon'));
     expect(screen.getByText('Update price')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Update price'));
-    waitFor(() => {
-      expect(screen.getByText('Save')).toBeVisible();
-      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '1000' } });
-      fireEvent.click(screen.getByText('Save'));
-      expect(postProductSpy).not.toHaveBeenCalled();
-      expect(screen.getByText('The max possible price is 999.99')).toBeInTheDocument();
-    });
+    await act(async () => await getProductSpy.mock.results[0].value);
+    expect(screen.getByText('Save')).toBeVisible();
+
+    fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '1000' } });
+    fireEvent.click(screen.getByText('Save'));
+    expect(postProductSpy).not.toHaveBeenCalled();
+    expect(screen.getByText('The max possible price is 999.99')).toBeInTheDocument();
   });
 
   it('Should allow to update the product price if the user is Admin', async () => {
     const product = oneProduct({ price: 55.99 });
-    getAllProductsSpy.mockResolvedValueOnce([product]);
+    const updatedPrice = 10;
+    const updatedProduct = oneProduct({ price: updatedPrice });
+
+    getAllProductsSpy.mockResolvedValueOnce([product]).mockResolvedValueOnce([updatedProduct]);
+    getProductSpy.mockResolvedValueOnce(product).mockResolvedValueOnce(product);
 
     render(<ProductsPage />, { wrapper: AppProvider });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
-    expect(screen.queryByText('10.00')).not.toBeInTheDocument();
+    expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('MoreVertIcon'));
     expect(screen.getByText('Update price')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Update price'));
-    waitFor(() => {
-      expect(screen.getByText('Save')).toBeVisible();
-      fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: '10' } });
-      fireEvent.click(screen.getByText('Save'));
-      expect(postProductSpy).toHaveBeenCalledWith({ ...product, price: 10 });
-      expect(screen.getByText(`Price 10 for '${product.title}' updated`)).toBeInTheDocument();
-      expect(screen.getByText('10.00')).toBeInTheDocument();
-    });
+    await act(async () => await getProductSpy.mock.results[0].value);
+    expect(screen.getByText('Save')).toBeVisible();
+
+    fireEvent.change(screen.getByDisplayValue('55.99'), { target: { value: `${updatedPrice}` } });
+    fireEvent.click(screen.getByText('Save'));
+    await act(async () => await getProductSpy.mock.results[1].value);
+
+    expect(postProductSpy).toHaveBeenCalledWith({ ...product, price: 10 });
+    expect(screen.getByText(`Price 10 for '${product.title}' updated`)).toBeInTheDocument();
+    expect(screen.getByText(/10.00/i)).toBeInTheDocument();
   });
 });
