@@ -69,37 +69,6 @@ export const ProductsPage: React.FC = () => {
     [currentUser]
   );
 
-  async function saveEditPrice(): Promise<void> {
-    if (editingProduct) {
-      const remoteProduct = await storeApi.get(editingProduct.id);
-
-      if (!remoteProduct) return;
-
-      const editedRemoteProduct = {
-        ...remoteProduct,
-        price: Number(editingProduct.price),
-      };
-
-      try {
-        await storeApi.post(editedRemoteProduct);
-
-        setNotification({
-          message: `Price ${editingProduct.price} for '${editingProduct.title}' updated`,
-          isError: false,
-        });
-        setEditingProduct(undefined);
-        reload();
-      } catch (error) {
-        setNotification({
-          message: `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`,
-          isError: true,
-        });
-        setEditingProduct(undefined);
-        reload();
-      }
-    }
-  }
-
   const columns: GridColDef<Product>[] = useMemo(
     () => [
       { ...baseColumn, field: 'id', headerName: 'ID', width: 70 },
@@ -194,10 +163,28 @@ export const ProductsPage: React.FC = () => {
       />
 
       <UpdatePriceDialog
-        isOpen={Boolean(editingProduct)}
         editingProduct={editingProduct}
-        setEditingProduct={setEditingProduct}
-        onSave={saveEditPrice}
+        storeApi={storeApi}
+        onSuccess={() => {
+          setNotification({
+            message: `Price ${editingProduct?.price} for '${editingProduct?.title}' updated`,
+            isError: false,
+          });
+          setEditingProduct(undefined);
+          reload();
+        }}
+        onFailure={() => {
+          setNotification({
+            message: `An error has ocurred updating the price ${editingProduct?.price} for '${editingProduct?.title}'`,
+            isError: true,
+          });
+          setEditingProduct(undefined);
+          reload();
+        }}
+        onPriceChange={updatedPrice => {
+          if (editingProduct) setEditingProduct({ ...editingProduct, price: updatedPrice });
+        }}
+        onCancel={() => setEditingProduct(undefined)}
       />
     </Stack>
   );

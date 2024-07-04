@@ -1,5 +1,5 @@
 import { Box, Stack, TextField, Typography } from '@mui/material';
-import { ChangeEvent, useCallback, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,12 +7,15 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import styled from '@emotion/styled';
 import { type Product } from '../pages/ProductsPage';
+import { StoreApi } from '../api/StoreApi';
 
 interface ConfirmationDialogProps {
-  isOpen: boolean;
   editingProduct: Product | undefined;
-  onSave?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  setEditingProduct: (product: Product | undefined) => void;
+  onSuccess: () => void;
+  onFailure: () => void;
+  onCancel: () => void;
+  storeApi: StoreApi;
+  onPriceChange: (price: string) => void;
 }
 
 const priceRegex = /^\d+(\.\d{1,2})?$/;
@@ -24,18 +27,14 @@ const ProductImage = styled.img`
 `;
 
 export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
-  const { isOpen, editingProduct, setEditingProduct, onSave } = props;
+  const { editingProduct, storeApi, onSuccess, onFailure, onCancel, onPriceChange } = props;
   const [priceError, setPriceError] = useState<string | undefined>(undefined);
-
-  const cancelEditPrice = useCallback(() => {
-    setEditingProduct(undefined);
-  }, [setEditingProduct]);
 
   function handleChangePrice(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
     if (!editingProduct) return;
 
     const isValidNumber = !isNaN(+event.target.value);
-    setEditingProduct({ ...editingProduct, price: event.target.value });
+    onPriceChange(event.target.value);
 
     if (!isValidNumber) {
       setPriceError('Only numbers are allowed');
@@ -50,11 +49,31 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
     }
   }
 
+  async function saveEditPrice(): Promise<void> {
+    if (editingProduct) {
+      const remoteProduct = await storeApi.get(editingProduct.id);
+
+      if (!remoteProduct) return;
+
+      const editedRemoteProduct = {
+        ...remoteProduct,
+        price: Number(editingProduct.price),
+      };
+
+      try {
+        await storeApi.post(editedRemoteProduct);
+        onSuccess();
+      } catch (error) {
+        onFailure();
+      }
+    }
+  }
+
   return (
     <Dialog
-      open={isOpen}
+      open={Boolean(editingProduct)}
       maxWidth="sm"
-      onClose={cancelEditPrice}
+      onClose={onCancel}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
@@ -78,8 +97,8 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onSave}>Save</Button>
-        <Button onClick={cancelEditPrice} autoFocus>
+        <Button onClick={saveEditPrice}>Save</Button>
+        <Button onClick={onCancel} autoFocus>
           Cancel
         </Button>
       </DialogActions>
