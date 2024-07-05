@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { describe, it } from '@jest/globals';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 
 import { AppProvider } from '../context/AppProvider';
 import { ProductsPage } from './ProductsPage';
@@ -20,10 +20,13 @@ const oneProduct = ({ price = 1 }) => ({
   },
 });
 
+const storeApi = new StoreApi();
+const Wrapper = ({ children }) => <AppProvider storeApi={storeApi}>{children}</AppProvider>;
+
 describe('#ProductsPage', () => {
-  const getAllProductsSpy = jest.spyOn(StoreApi.prototype, 'getAll');
-  const postProductSpy = jest.spyOn(StoreApi.prototype, 'post');
-  const getProductSpy = jest.spyOn(StoreApi.prototype, 'get');
+  const getAllProductsSpy = jest.spyOn(storeApi, 'getAll');
+  const postProductSpy = jest.spyOn(storeApi, 'post');
+  const getProductSpy = jest.spyOn(storeApi, 'get');
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -32,7 +35,7 @@ describe('#ProductsPage', () => {
   it('Should retrieve products from API when the oponent loads', async () => {
     getAllProductsSpy.mockResolvedValueOnce([]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(getAllProductsSpy).toHaveBeenCalledTimes(1);
@@ -42,7 +45,7 @@ describe('#ProductsPage', () => {
     const product = oneProduct({});
     getAllProductsSpy.mockResolvedValueOnce([product]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText(new RegExp(`${product.id}`, 'i'))).toBeInTheDocument();
@@ -56,7 +59,7 @@ describe('#ProductsPage', () => {
     const product = oneProduct({ price: 40.1 });
     getAllProductsSpy.mockResolvedValueOnce([product]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText('$40.10')).toBeInTheDocument();
@@ -66,7 +69,7 @@ describe('#ProductsPage', () => {
     const product = oneProduct({ price: 1 });
     getAllProductsSpy.mockResolvedValueOnce([product]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText('active')).toBeInTheDocument();
@@ -77,7 +80,7 @@ describe('#ProductsPage', () => {
     const product = oneProduct({ price: 0 });
     getAllProductsSpy.mockResolvedValueOnce([product]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText('inactive')).toBeInTheDocument();
@@ -87,7 +90,7 @@ describe('#ProductsPage', () => {
   it('Should have an Admin user as default when the component loads', async () => {
     getAllProductsSpy.mockResolvedValueOnce([]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.queryByText('User: Admin user')).toBeInTheDocument();
@@ -96,7 +99,7 @@ describe('#ProductsPage', () => {
   it('Should showcase user modal when clicking in the User button', async () => {
     getAllProductsSpy.mockResolvedValueOnce([]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.queryByText('Admin user')).not.toBeVisible();
@@ -113,7 +116,7 @@ describe('#ProductsPage', () => {
     const product = oneProduct({});
     getAllProductsSpy.mockResolvedValueOnce([product]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     const actionsButton = screen.getByTestId('MoreVertIcon');
@@ -125,7 +128,7 @@ describe('#ProductsPage', () => {
     const product = oneProduct({});
     getAllProductsSpy.mockResolvedValueOnce([product]);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     const buttons = screen.getAllByRole('button');
@@ -149,7 +152,7 @@ describe('#ProductsPage', () => {
     getAllProductsSpy.mockResolvedValueOnce([product]);
     getProductSpy.mockResolvedValueOnce(product);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText('User: Admin user')).toBeInTheDocument();
@@ -172,7 +175,7 @@ describe('#ProductsPage', () => {
     getAllProductsSpy.mockResolvedValueOnce([product]);
     getProductSpy.mockResolvedValueOnce(product);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText('User: Admin user')).toBeInTheDocument();
@@ -195,7 +198,7 @@ describe('#ProductsPage', () => {
     getAllProductsSpy.mockResolvedValueOnce([product]);
     getProductSpy.mockResolvedValueOnce(product);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText('User: Admin user')).toBeInTheDocument();
@@ -221,7 +224,7 @@ describe('#ProductsPage', () => {
     getAllProductsSpy.mockResolvedValueOnce([product]).mockResolvedValueOnce([updatedProduct]);
     getProductSpy.mockResolvedValueOnce(product).mockResolvedValueOnce(product);
 
-    render(<ProductsPage />, { wrapper: AppProvider });
+    render(<ProductsPage />, { wrapper: Wrapper });
     await act(async () => await getAllProductsSpy.mock.results[0].value);
 
     expect(screen.getByText('User: Admin user')).toBeInTheDocument();

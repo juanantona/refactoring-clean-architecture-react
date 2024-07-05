@@ -8,7 +8,7 @@ export function useAppContext() {
     throw new Error('App context uninitialized');
   }
 
-  const { users, currentUser, setCurrentUser } = context;
+  const { users, currentUser, setCurrentUser, storeApi } = context;
 
   const onCurrentUserChange = useCallback(
     (currentUserId: string) => {
@@ -25,5 +25,6 @@ export function useAppContext() {
     users,
     currentUser,
     onCurrentUserChange,
+    storeApi,
   };
 }

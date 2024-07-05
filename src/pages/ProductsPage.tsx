@@ -9,9 +9,8 @@ import { type Notification, ToastNotification } from '../components/ToastNotific
 import { UpdatePriceDialog } from '../components/UpdatePriceDialog';
 import { ProductList } from '../components/ProductList';
 import { useReload } from '../hooks/useReload';
-import { RemoteProduct, StoreApi } from '../api/StoreApi';
-
-const storeApi = new StoreApi();
+import { RemoteProduct } from '../api/StoreApi';
+import { useAppContext } from '../context/useAppContext';
 
 export const ProductsPage: React.FC = () => {
   const [reloadKey, reload] = useReload();
@@ -19,6 +18,8 @@ export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [notification, setNotification] = useState<Notification>({ isError: false });
   const [editingProductId, setEditingProductId] = useState<number | undefined>(undefined);
+
+  const { storeApi } = useAppContext();
 
   useEffect(() => {
     storeApi.getAll().then(response => {
@@ -30,7 +31,7 @@ export const ProductsPage: React.FC = () => {
 
       setProducts(products);
     });
-  }, [reloadKey]);
+  }, [reloadKey, storeApi]);
 
   const openUpdatePriceDialogForProductId = useCallback((id: number) => {
     setEditingProductId(id);
@@ -59,7 +60,6 @@ export const ProductsPage: React.FC = () => {
       {editingProductId && (
         <UpdatePriceDialog
           editingProductId={editingProductId}
-          storeApi={storeApi}
           setNotification={setNotification}
           reload={reload}
           onClose={() => setEditingProductId(undefined)}
