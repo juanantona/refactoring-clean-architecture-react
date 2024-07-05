@@ -63,7 +63,8 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
       message: 'Only admin users can edit the price of a product',
       isError: true,
     });
-  }, [setNotification]);
+    onClose();
+  }, [onClose, setNotification]);
 
   useEffect(() => {
     const fetchProduct = async () => {
