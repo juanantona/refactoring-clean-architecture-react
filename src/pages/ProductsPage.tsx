@@ -8,8 +8,7 @@ import {
 import { Footer } from '../components/Footer';
 import { MainAppBar } from '../components/MainAppBar';
 import styled from '@emotion/styled';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAppContext } from '../context/useAppContext';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 
 import { type Notification, ToastNotification } from '../components/ToastNotification';
 import { UpdatePriceDialog } from '../components/UpdatePriceDialog';
@@ -24,13 +23,11 @@ const baseColumn: Partial<GridColDef<Product>> = {
 const storeApi = new StoreApi();
 
 export const ProductsPage: React.FC = () => {
-  const { currentUser } = useAppContext();
   const [reloadKey, reload] = useReload();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [notification, setNotification] = useState<Notification>({ isError: false });
-
-  const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
+  const [editingProductId, setEditingProductId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     storeApi.getAll().then(response => {
@@ -44,30 +41,9 @@ export const ProductsPage: React.FC = () => {
     });
   }, [reloadKey]);
 
-  const updatingQuantity = useCallback(
-    async (id: number) => {
-      if (id) {
-        if (!currentUser.isAdmin) {
-          setNotification({
-            message: 'Only admin users can edit the price of a product',
-            isError: true,
-          });
-          return;
-        }
-
-        storeApi
-          .get(id)
-          .then(buildProduct)
-          .then(product => {
-            setEditingProduct(product);
-          })
-          .catch(() => {
-            setNotification({ message: `Product with id ${id} not found`, isError: true });
-          });
-      }
-    },
-    [currentUser]
-  );
+  const openUpdatePriceDialogForProductId = useCallback((id: number) => {
+    setEditingProductId(id);
+  }, []);
 
   const columns: GridColDef<Product>[] = useMemo(
     () => [
@@ -125,13 +101,13 @@ export const ProductsPage: React.FC = () => {
         getActions: cell => [
           <GridActionsCellItem
             label="Update price"
-            onClick={() => updatingQuantity(cell.row.id)} // openAddModal(cell.row)}
+            onClick={() => openUpdatePriceDialogForProductId(cell.row.id)}
             showInMenu
           />,
         ],
       },
     ],
-    [updatingQuantity]
+    [openUpdatePriceDialogForProductId]
   );
 
   return (
@@ -162,30 +138,15 @@ export const ProductsPage: React.FC = () => {
         notification={notification}
       />
 
-      <UpdatePriceDialog
-        editingProduct={editingProduct}
-        storeApi={storeApi}
-        onSuccess={() => {
-          setNotification({
-            message: `Price ${editingProduct?.price} for '${editingProduct?.title}' updated`,
-            isError: false,
-          });
-          setEditingProduct(undefined);
-          reload();
-        }}
-        onFailure={() => {
-          setNotification({
-            message: `An error has ocurred updating the price ${editingProduct?.price} for '${editingProduct?.title}'`,
-            isError: true,
-          });
-          setEditingProduct(undefined);
-          reload();
-        }}
-        onPriceChange={updatedPrice => {
-          if (editingProduct) setEditingProduct({ ...editingProduct, price: updatedPrice });
-        }}
-        onCancel={() => setEditingProduct(undefined)}
-      />
+      {editingProductId && (
+        <UpdatePriceDialog
+          editingProductId={editingProductId}
+          storeApi={storeApi}
+          setNotification={setNotification}
+          reload={reload}
+          onClose={() => setEditingProductId(undefined)}
+        />
+      )}
     </Stack>
   );
 };
