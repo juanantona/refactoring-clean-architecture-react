@@ -119,22 +119,16 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
   }
 
   async function saveEditPrice(): Promise<void> {
-    if (editingProduct) {
-      const remoteProduct = await storeApi.get(editingProduct.id);
+    if (!editingProduct) return;
 
-      if (!remoteProduct) return;
+    const remoteProduct = await storeApi.get(editingProduct.id);
+    if (!remoteProduct) return;
 
-      const editedRemoteProduct = {
-        ...remoteProduct,
-        price: Number(editingProduct.price),
-      };
-
-      try {
-        await storeApi.post(editedRemoteProduct);
-        onSuccess();
-      } catch (error) {
-        onFailure();
-      }
+    try {
+      await storeApi.post({ ...remoteProduct, price: Number(editingProduct.price) });
+      onSuccess();
+    } catch {
+      onFailure();
     }
   }
 
