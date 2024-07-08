@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from 'react';
 
 import { type Notification, ToastNotification } from '../components/ToastNotification';
 import { UpdatePriceDialog } from '../components/UpdatePriceDialog';
-import { ProductList } from '../components/ProductList';
+import { ProductTable } from '../components/ProductTable';
 import { useReload } from '../hooks/useReload';
 import { RemoteProduct } from '../api/StoreApi';
 import { useAppContext } from '../context/useAppContext';
@@ -45,7 +45,7 @@ export const ProductsPage: React.FC = () => {
         <Typography variant="h3" component="h1" gutterBottom>
           {'Product price updater'}
         </Typography>
-        <ProductList
+        <ProductTable
           products={products}
           openUpdatePriceDialogForProductId={openUpdatePriceDialogForProductId}
         />

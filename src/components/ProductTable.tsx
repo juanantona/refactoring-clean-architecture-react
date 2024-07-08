@@ -21,7 +21,7 @@ const baseColumn: Partial<GridColDef<Product>> = {
   sortable: false,
 };
 
-export const ProductList: React.FC<Props> = props => {
+export const ProductTable: React.FC<Props> = props => {
   const { products, openUpdatePriceDialogForProductId } = props;
 
   const columns: GridColDef<Product>[] = useMemo(
