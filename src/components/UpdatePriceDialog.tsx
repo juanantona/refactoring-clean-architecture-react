@@ -13,7 +13,7 @@ import { type Notification } from '../components/ToastNotification';
 
 interface ConfirmationDialogProps {
   editingProductId: number;
-  onClose: () => void;
+  resetEditingProductId: () => void;
   reload: () => void;
   setNotification: (notification: Notification) => void;
 }
@@ -39,7 +39,7 @@ const ProductImage = styled.img`
 `;
 
 export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
-  const { editingProductId, onClose, setNotification, reload } = props;
+  const { editingProductId, resetEditingProductId, setNotification, reload } = props;
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [priceError, setPriceError] = useState<string | undefined>(undefined);
 
@@ -54,16 +54,16 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
 
   const onCancel = useCallback(() => {
     setEditingProduct(undefined);
-    onClose();
-  }, [onClose]);
+    resetEditingProductId();
+  }, [resetEditingProductId]);
 
   const onNonAdminUserError = useCallback(() => {
     setNotification({
       message: 'Only admin users can edit the price of a product',
       isError: true,
     });
-    onClose();
-  }, [onClose, setNotification]);
+    resetEditingProductId();
+  }, [resetEditingProductId, setNotification]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -85,7 +85,7 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
       isError: false,
     });
     setEditingProduct(undefined);
-    onClose();
+    resetEditingProductId();
     reload();
   }
 
@@ -95,7 +95,7 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
       isError: true,
     });
     setEditingProduct(undefined);
-    onClose();
+    resetEditingProductId();
     reload();
   }
 

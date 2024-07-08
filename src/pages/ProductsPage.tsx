@@ -62,7 +62,7 @@ export const ProductsPage: React.FC = () => {
           editingProductId={editingProductId}
           setNotification={setNotification}
           reload={reload}
-          onClose={() => setEditingProductId(undefined)}
+          resetEditingProductId={() => setEditingProductId(undefined)}
         />
       )}
     </Stack>
