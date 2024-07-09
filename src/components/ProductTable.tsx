@@ -7,11 +7,11 @@ import {
   GridValueFormatterParams,
 } from '@mui/x-data-grid';
 import styled from '@emotion/styled';
-import { type Product } from '../pages/ProductsPage';
+import { type Product } from '../components/ProductList';
 
 type Props = {
   products: Product[];
-  openUpdatePriceDialogForProductId: (id: number) => vooid;
+  openUpdatePriceDialogForProductId: (id: number) => void;
 };
 
 type ProductStatus = 'active' | 'inactive';

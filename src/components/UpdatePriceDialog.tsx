@@ -6,7 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import styled from '@emotion/styled';
-import { type Product } from '../pages/ProductsPage';
+import { type Product } from '../components/ProductList';
 import { type RemoteProduct } from '../api/StoreApi';
 import { useAppContext } from '../context/useAppContext';
 import { type Notification } from '../components/ToastNotification';
