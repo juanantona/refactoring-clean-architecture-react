@@ -6,28 +6,15 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import styled from '@emotion/styled';
-import { type Product } from '../components/ProductList';
-import { type RemoteProduct } from '../api/StoreApi';
 import { useAppContext } from '../context/useAppContext';
 import { type Notification } from '../components/ToastNotification';
+import { Product } from '../domain/product';
 
 interface ConfirmationDialogProps {
   editingProductId: number;
   resetEditingProductId: () => void;
   reload: () => void;
   setNotification: (notification: Notification) => void;
-}
-
-function buildProduct(remoteProduct: RemoteProduct): Product {
-  return {
-    id: remoteProduct.id,
-    title: remoteProduct.title,
-    image: remoteProduct.image,
-    price: remoteProduct.price.toLocaleString('en-US', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    }),
-  };
 }
 
 const priceRegex = /^\d+(\.\d{1,2})?$/;
@@ -69,7 +56,7 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
     const fetchProduct = async () => {
       try {
         const remoteProduct = await storeApi.get(editingProductId);
-        const product = buildProduct(remoteProduct);
+        const product = Product.create(remoteProduct);
         setEditingProduct(product);
       } catch {
         onError();
@@ -103,7 +90,8 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
     if (!editingProduct) return;
 
     const isValidNumber = !isNaN(+event.target.value);
-    setEditingProduct({ ...editingProduct, price: event.target.value });
+    editingProduct.updatePrice(event.target.value);
+    setEditingProduct(editingProduct);
 
     if (!isValidNumber) {
       setPriceError('Only numbers are allowed');
