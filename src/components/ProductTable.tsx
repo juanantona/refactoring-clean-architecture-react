@@ -7,7 +7,7 @@ import {
   GridValueFormatterParams,
 } from '@mui/x-data-grid';
 import styled from '@emotion/styled';
-import { type Product } from '../components/ProductList';
+import { Product } from '../domain/product';
 
 type Props = {
   products: Product[];
