@@ -25,6 +25,16 @@ export class Product {
   }
 
   updatePrice(newPrice: string): void {
+    const isInValidNumber = isNaN(+newPrice);
+    const priceRegex = /^\d+(\.\d{1,2})?$/;
+    const isInvalidFormat = !priceRegex.test(newPrice);
+    const maximunValidAmount = 999.99;
+    const isHigherThanMaximun = +newPrice > maximunValidAmount;
+
+    if (isInValidNumber) throw new Error('Only numbers are allowed');
+    if (isInvalidFormat) throw new Error('Invalid price format');
+    if (isHigherThanMaximun) throw new Error('The max possible price is 999.99');
+
     this.price = newPrice;
   }
 }

@@ -17,8 +17,6 @@ interface ConfirmationDialogProps {
   setNotification: (notification: Notification) => void;
 }
 
-const priceRegex = /^\d+(\.\d{1,2})?$/;
-
 const ProductImage = styled.img`
   width: 200px;
   height: 200px;
@@ -89,20 +87,12 @@ export const UpdatePriceDialog: React.FC<ConfirmationDialogProps> = props => {
   function handleChangePrice(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
     if (!editingProduct) return;
 
-    const isValidNumber = !isNaN(+event.target.value);
-    editingProduct.updatePrice(event.target.value);
-    setEditingProduct(editingProduct);
-
-    if (!isValidNumber) {
-      setPriceError('Only numbers are allowed');
-    } else {
-      if (!priceRegex.test(event.target.value)) {
-        setPriceError('Invalid price format');
-      } else if (+event.target.value > 999.99) {
-        setPriceError('The max possible price is 999.99');
-      } else {
-        setPriceError(undefined);
-      }
+    try {
+      editingProduct.updatePrice(event.target.value);
+      setPriceError(undefined);
+      setEditingProduct(editingProduct);
+    } catch (error) {
+      if (error instanceof Error) setPriceError(error.message);
     }
   }
 
