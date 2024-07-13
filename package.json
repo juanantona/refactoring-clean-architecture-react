@@ -10,7 +10,8 @@
     "prettify": "prettier \"./**/*.{js,jsx,json,css,ts,tsx}\" --write",
     "preview": "vite preview",
     "test": "vitest run",
-    "test-watch": "vitest watch"
+    "test-watch": "vitest watch",
+    "prepare": "husky"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -35,6 +36,7 @@
     "eslint": "^8.53.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
+    "husky": "^9.0.11",
     "jsdom": "^24.1.0",
     "prettier": "^2.8.7",
     "typescript": "5.2.2",
