@@ -4,19 +4,22 @@ import userEvent from '@testing-library/user-event';
 
 import { ProductsPage } from './ProductsPage';
 import { AppProvider } from '../context/AppProvider';
+import { StoreApi } from '../api/StoreApi';
 
-const product = {
-  id: 1,
-  title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
-  price: 109.95,
-  description:
-    'Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday',
-  category: "men's clothing",
-  image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
-  rating: {
-    rate: 3.9,
-    count: 120,
-  },
+const oneProduct = (productData?: { price?: number }) => {
+  return {
+    id: 1,
+    title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
+    price: productData?.price ?? 109.95,
+    description:
+      'Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday',
+    category: "men's clothing",
+    image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
+    rating: {
+      rate: 3.9,
+      count: 120,
+    },
+  };
 };
 
 // Requisitos funcionales
@@ -37,22 +40,17 @@ const product = {
 //  - Si el precio es mayor que cero se muestra la etiqueta active en verde
 
 describe('Products Page', () => {
-  const getProductsMock = jest.fn();
-  beforeEach(() => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: getProductsMock,
-      })
-    );
-  });
+  const getAllProductsSpy = jest.spyOn(StoreApi.prototype, 'getAll');
+  const getProductSpy = jest.spyOn(StoreApi.prototype, 'get');
+  const postProductSpy = jest.spyOn(StoreApi.prototype, 'post');
 
   afterEach(() => {
-    jest.clearAllMocks();
+    getAllProductsSpy.mockReset();
   });
 
   describe('When load the page', () => {
     it('Should showcase the page title', async () => {
-      getProductsMock.mockResolvedValue([]);
+      getAllProductsSpy.mockResolvedValue([]);
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
 
@@ -60,18 +58,40 @@ describe('Products Page', () => {
     });
   });
 
-  it('Should display the title and the price of the product', async () => {
-    getProductsMock.mockResolvedValue([product]);
+  describe('When there is one product available ', () => {
+    it('Should display the title and the price of the product', async () => {
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
 
-    await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
 
-    expect(screen.getByText(product.title)).toBeInTheDocument();
-    expect(screen.getByText(`$${product.price}`)).toBeInTheDocument();
+      expect(screen.getByText(product.title)).toBeInTheDocument();
+      expect(screen.getByText(`$${product.price}`)).toBeInTheDocument();
+    });
+
+    it('Should display the active tag when the product price is avobe 0', async () => {
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.getByText('active')).toBeInTheDocument();
+    });
+
+    it('Should display the inactive tag when the product price is 0', async () => {
+      const product = oneProduct({ price: 0 });
+      getAllProductsSpy.mockResolvedValue([product]);
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.getByText('inactive')).toBeInTheDocument();
+    });
   });
 
   describe('When click on users button', () => {
     it('Should be able to change the user type', async () => {
-      getProductsMock.mockResolvedValue([product]);
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
       const user = userEvent.setup();
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
@@ -89,7 +109,8 @@ describe('Products Page', () => {
 
   describe('When the user is a Non admin user', () => {
     it('Should display an error message if tries to update the product price', async () => {
-      getProductsMock.mockResolvedValue([product]);
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
       const user = userEvent.setup();
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
@@ -112,7 +133,10 @@ describe('Products Page', () => {
 
   describe('When the user is an Admin user', () => {
     it('Should display the update price modal if tries to update the product price', async () => {
-      getProductsMock.mockResolvedValue([product]);
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
+      getProductSpy.mockResolvedValue(product);
+
       const user = userEvent.setup();
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
@@ -125,12 +149,14 @@ describe('Products Page', () => {
       expect(updatePriceButton).toBeInTheDocument();
       await user.click(updatePriceButton);
 
-      const priceInput = screen.getByDisplayValue(product.price);
+      const priceInput = screen.queryByDisplayValue(product.price);
       expect(priceInput).toBeInTheDocument();
     });
 
     it('Should display an error message if tries to use letters in the price input', async () => {
-      getProductsMock.mockResolvedValue([product]);
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
+      getProductSpy.mockResolvedValue(product);
       const user = userEvent.setup();
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
@@ -151,7 +177,9 @@ describe('Products Page', () => {
     });
 
     it('Should display an error message if tries to type a point without decimal places', async () => {
-      getProductsMock.mockResolvedValue([product]);
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
+      getProductSpy.mockResolvedValue(product);
       const user = userEvent.setup();
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
@@ -172,7 +200,9 @@ describe('Products Page', () => {
     });
 
     it('Should display an error message if tries to type a number bigger than 999.99', async () => {
-      getProductsMock.mockResolvedValue([product]);
+      const product = oneProduct();
+      getAllProductsSpy.mockResolvedValue([product]);
+      getProductSpy.mockResolvedValue(product);
       const user = userEvent.setup();
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
@@ -193,8 +223,13 @@ describe('Products Page', () => {
     });
 
     it('Should update the price if the input value is correct', async () => {
-      getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
+      const product = oneProduct();
+      const newPrice = '123.95';
+      const updatedProduct = oneProduct({ price: Number(newPrice) });
+      getAllProductsSpy.mockResolvedValueOnce([product]).mockResolvedValue([updatedProduct]);
+      getProductSpy.mockResolvedValueOnce(product).mockResolvedValueOnce(updatedProduct);
+      postProductSpy.mockImplementationOnce(() => Promise.resolve());
 
       await act(async () => {
         render(<ProductsPage />, { wrapper: AppProvider });
@@ -209,13 +244,12 @@ describe('Products Page', () => {
       await user.click(updatePriceButton);
 
       const priceInput = screen.getByDisplayValue(product.price);
-      const newPrice = '123.00';
       await user.clear(priceInput);
       await user.type(priceInput, newPrice);
       await user.click(screen.getByText('Save'));
 
       expect(
-        screen.getByText(`Price ${newPrice} for '${product.title}' updated`)
+        screen.getByText(`Price ${newPrice} for '${updatedProduct.title}' updated`)
       ).toBeInTheDocument();
 
       await waitFor(() => screen.getByText(`$${newPrice}`));
