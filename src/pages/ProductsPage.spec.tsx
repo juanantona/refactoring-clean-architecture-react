@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { ProductsPage } from './ProductsPage';
 import { AppProvider } from '../context/AppProvider';
 
@@ -84,6 +85,29 @@ describe('Products Page', () => {
       await userEvent.click(screen.getByText('Non admin user'));
 
       expect(screen.getByText('User: Non admin user')).toBeInTheDocument();
+    });
+  });
+
+  describe('When the user is a Non admin user', () => {
+    it('Should display an error message if tries to update the price', async () => {
+      getProductsMock.mockResolvedValue([product]);
+      const user = userEvent.setup();
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      const userButton = screen.getByText('User:', { exact: false });
+      await user.click(userButton);
+      await user.click(screen.getByText('Non admin user'));
+
+      const actionsControl = screen.getByLabelText('more');
+      await user.click(actionsControl);
+      const updatePriceButton = screen.getByText('Update price');
+      expect(updatePriceButton).toBeInTheDocument();
+      await user.click(updatePriceButton);
+
+      expect(
+        screen.getByText('Only admin users can edit the price of a product')
+      ).toBeInTheDocument();
     });
   });
 });
