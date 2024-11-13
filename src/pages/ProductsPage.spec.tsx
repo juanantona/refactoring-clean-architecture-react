@@ -74,22 +74,23 @@ describe('Products Page', () => {
   describe('When click on users button', () => {
     it('Should be able to change the user type', async () => {
       getProductsMock.mockResolvedValue([product]);
+      const user = userEvent.setup();
 
       await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
 
       expect(screen.queryByText('User: Non admin user')).not.toBeInTheDocument();
 
       const userButton = screen.getByText('User:', { exact: false });
-      await userEvent.click(userButton);
+      await user.click(userButton);
       expect(screen.getByText('Non admin user')).toBeVisible();
-      await userEvent.click(screen.getByText('Non admin user'));
+      await user.click(screen.getByText('Non admin user'));
 
       expect(screen.getByText('User: Non admin user')).toBeInTheDocument();
     });
   });
 
   describe('When the user is a Non admin user', () => {
-    it('Should display an error message if tries to update the price', async () => {
+    it('Should display an error message if tries to update the product price', async () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
@@ -108,6 +109,26 @@ describe('Products Page', () => {
       expect(
         screen.getByText('Only admin users can edit the price of a product')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('When the user is an Admin user', () => {
+    it('Should display the update price modal if tries to update the product price', async () => {
+      getProductsMock.mockResolvedValue([product]);
+      const user = userEvent.setup();
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
+
+      const actionsControl = screen.getByLabelText('more');
+      await user.click(actionsControl);
+      const updatePriceButton = screen.getByText('Update price');
+      expect(updatePriceButton).toBeInTheDocument();
+      await user.click(updatePriceButton);
+
+      const priceInput = screen.getByDisplayValue(`${product.price}`);
+      expect(priceInput).toBeInTheDocument();
     });
   });
 });
