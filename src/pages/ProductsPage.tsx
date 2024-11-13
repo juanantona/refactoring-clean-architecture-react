@@ -13,6 +13,7 @@ import { useAppContext } from '../context/useAppContext';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { useReload } from '../hooks/useReload';
 import { RemoteProduct, StoreApi } from '../api/StoreApi';
+import { type Notification, ToastNotification } from '../components/ToastNotification';
 
 const baseColumn: Partial<GridColDef<Product>> = {
   disableColumnMenu: true,
@@ -28,6 +29,8 @@ export const ProductsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [snackBarError, setSnackBarError] = useState<string>();
   const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
+
+  const [notification, setNotification] = useState<Notification>();
 
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
   const [priceError, setPriceError] = useState<string | undefined>(undefined);
@@ -48,7 +51,10 @@ export const ProductsPage: React.FC = () => {
     async (id: number) => {
       if (id) {
         if (!currentUser.isAdmin) {
-          setSnackBarError('Only admin users can edit the price of a product');
+          setNotification({
+            message: 'Only admin users can edit the price of a product',
+            type: 'error',
+          });
           return;
         }
 
@@ -203,6 +209,11 @@ export const ProductsPage: React.FC = () => {
         />
       </MainContainer>
       <Footer />
+
+      <ToastNotification
+        notification={notification}
+        resetNotification={() => setNotification(undefined)}
+      />
 
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
