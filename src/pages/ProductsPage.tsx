@@ -1,4 +1,4 @@
-import { Alert, Box, Container, Snackbar, Stack, TextField, Typography } from '@mui/material';
+import { Box, Container, Stack, TextField, Typography } from '@mui/material';
 import {
   DataGrid,
   GridActionsCellItem,
@@ -27,8 +27,6 @@ export const ProductsPage: React.FC = () => {
   const [reloadKey, reload] = useReload();
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [snackBarError, setSnackBarError] = useState<string>();
-  const [snackBarSuccess, setSnackBarSuccess] = useState<string>();
 
   const [notification, setNotification] = useState<Notification>();
 
@@ -65,7 +63,10 @@ export const ProductsPage: React.FC = () => {
             setEditingProduct(product);
           })
           .catch(() => {
-            setSnackBarError(`Product with id ${id} not found`);
+            setNotification({
+              message: `Product with id ${id} not found`,
+              type: 'error',
+            });
           });
       }
     },
@@ -109,13 +110,17 @@ export const ProductsPage: React.FC = () => {
       try {
         await storeApi.post(editedRemoteProduct);
 
-        setSnackBarSuccess(`Price ${editingProduct.price} for '${editingProduct.title}' updated`);
+        setNotification({
+          message: `Price ${editingProduct.price} for '${editingProduct.title}' updated`,
+          type: 'success',
+        });
         setEditingProduct(undefined);
         reload();
       } catch (error) {
-        setSnackBarSuccess(
-          `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`
-        );
+        setNotification({
+          message: `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`,
+          type: 'error',
+        });
         setEditingProduct(undefined);
         reload();
       }
@@ -214,24 +219,6 @@ export const ProductsPage: React.FC = () => {
         notification={notification}
         resetNotification={() => setNotification(undefined)}
       />
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={snackBarError !== undefined}
-        autoHideDuration={2000}
-        onClose={() => setSnackBarError(undefined)}
-      >
-        <Alert severity="error">{snackBarError}</Alert>
-      </Snackbar>
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={snackBarSuccess !== undefined}
-        autoHideDuration={2000}
-        onClose={() => setSnackBarSuccess(undefined)}
-      >
-        <Alert severity="success">{snackBarSuccess}</Alert>
-      </Snackbar>
 
       {editingProduct && (
         <ConfirmationDialog
