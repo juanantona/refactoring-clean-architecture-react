@@ -1,16 +1,89 @@
-import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ProductsPage } from './ProductsPage';
 import { AppProvider } from '../context/AppProvider';
 
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    json: () => Promise.resolve([]),
-  })
-);
+const product = {
+  id: 1,
+  title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
+  price: 109.95,
+  description:
+    'Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday',
+  category: "men's clothing",
+  image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
+  rating: {
+    rate: 3.9,
+    count: 120,
+  },
+};
 
-it('Should showcase the page title', async () => {
-  await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+// Requisitos funcionales
+//
+// Mostrar los datos relativos a un producto: title, image, price, status
+// Si clicko en el selector de usuario puedo cambiar el tipo de usuario
+// Para usuarios NO administradores:
+//  - Si trata de actualizar un precio aparece un mensaje de error
+// Para usuarios administradores:
+//  - Si trata de actualizar un precio aparece una ventana modal
+//  - Si escribe un precio en el text box:
+//    - Si intenta meter letras sale un mensaje de error
+//    - Si intenta escribir un punto añadir cifras decmales sale un mensaje de error
+//    - Si intenta escribir un número mayor de 999.99 sale un mensaje de error
+//    - Si escribe un numero valido y click en salvar el precio del artículo se actuaiza
+//  Existen dos estado para los productos en el interfaz:
+//  - Si el precio es cero se muestra la etiqueta inactive en rojo
+//  - Si el precio es mayor que cero se muestra la etiqueta active en verde
 
-  expect(screen.getByText('Refactoring a Clean Architecture in React')).toBeInTheDocument();
+describe('Products Page', () => {
+  const getProductsMock = jest.fn();
+  beforeEach(() => {
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: getProductsMock,
+      })
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('When load the page', () => {
+    it('Should showcase the page title', async () => {
+      getProductsMock.mockResolvedValue([]);
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.getByText('Refactoring a Clean Architecture in React')).toBeInTheDocument();
+    });
+  });
+
+  it('Should display the title and the price of the product', async () => {
+    getProductsMock.mockResolvedValue([product]);
+
+    await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+    expect(
+      screen.getByText('Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops')
+    ).toBeInTheDocument();
+    expect(screen.getByText('$109.95')).toBeInTheDocument();
+  });
+
+  describe('When click on users button', () => {
+    it('Should be able to change the user type', async () => {
+      getProductsMock.mockResolvedValue([product]);
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.queryByText('User: Non admin user')).not.toBeInTheDocument();
+
+      const userButton = screen.getByText('User:', { exact: false });
+      await userEvent.click(userButton);
+      expect(screen.getByText('Non admin user')).toBeVisible();
+      await userEvent.click(screen.getByText('Non admin user'));
+
+      expect(screen.getByText('User: Non admin user')).toBeInTheDocument();
+    });
+  });
 });
