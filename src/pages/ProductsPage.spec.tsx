@@ -127,8 +127,71 @@ describe('Products Page', () => {
       expect(updatePriceButton).toBeInTheDocument();
       await user.click(updatePriceButton);
 
-      const priceInput = screen.getByDisplayValue(`${product.price}`);
+      const priceInput = screen.getByDisplayValue(product.price);
       expect(priceInput).toBeInTheDocument();
+    });
+
+    it('Should display an error message if tries to use letters in the price input', async () => {
+      getProductsMock.mockResolvedValue([product]);
+      const user = userEvent.setup();
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
+
+      const actionsControl = screen.getByLabelText('more');
+      await user.click(actionsControl);
+      const updatePriceButton = screen.getByText('Update price');
+      expect(updatePriceButton).toBeInTheDocument();
+      await user.click(updatePriceButton);
+
+      const priceInput = screen.getByDisplayValue(product.price);
+      await user.clear(priceInput);
+      await user.type(priceInput, 'kkk');
+
+      expect(screen.getByText('Only numbers are allowed')).toBeInTheDocument();
+    });
+
+    it('Should display an error message if tries to type a point without decimal places', async () => {
+      getProductsMock.mockResolvedValue([product]);
+      const user = userEvent.setup();
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
+
+      const actionsControl = screen.getByLabelText('more');
+      await user.click(actionsControl);
+      const updatePriceButton = screen.getByText('Update price');
+      expect(updatePriceButton).toBeInTheDocument();
+      await user.click(updatePriceButton);
+
+      const priceInput = screen.getByDisplayValue(product.price);
+      await user.clear(priceInput);
+      await user.type(priceInput, '1.');
+
+      expect(screen.getByText('Invalid price format')).toBeInTheDocument();
+    });
+
+    it('Should display an error message if tries to type a number bigger than 999.99', async () => {
+      getProductsMock.mockResolvedValue([product]);
+      const user = userEvent.setup();
+
+      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
+
+      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
+
+      const actionsControl = screen.getByLabelText('more');
+      await user.click(actionsControl);
+      const updatePriceButton = screen.getByText('Update price');
+      expect(updatePriceButton).toBeInTheDocument();
+      await user.click(updatePriceButton);
+
+      const priceInput = screen.getByDisplayValue(product.price);
+      await user.clear(priceInput);
+      await user.type(priceInput, '1000');
+
+      expect(screen.getByText('The max possible price is 999.99')).toBeInTheDocument();
     });
   });
 });
