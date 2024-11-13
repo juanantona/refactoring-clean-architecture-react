@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ProductsPage } from './ProductsPage';
@@ -65,10 +65,8 @@ describe('Products Page', () => {
 
     await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
 
-    expect(
-      screen.getByText('Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops')
-    ).toBeInTheDocument();
-    expect(screen.getByText('$109.95')).toBeInTheDocument();
+    expect(screen.getByText(product.title)).toBeInTheDocument();
+    expect(screen.getByText(`$${product.price}`)).toBeInTheDocument();
   });
 
   describe('When click on users button', () => {
@@ -192,6 +190,36 @@ describe('Products Page', () => {
       await user.type(priceInput, '1000');
 
       expect(screen.getByText('The max possible price is 999.99')).toBeInTheDocument();
+    });
+
+    it('Should update the price if the input value is correct', async () => {
+      getProductsMock.mockResolvedValue([product]);
+      const user = userEvent.setup();
+
+      await act(async () => {
+        render(<ProductsPage />, { wrapper: AppProvider });
+      });
+
+      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
+
+      const actionsControl = screen.getByLabelText('more');
+      await user.click(actionsControl);
+      const updatePriceButton = screen.getByText('Update price');
+      expect(updatePriceButton).toBeInTheDocument();
+      await user.click(updatePriceButton);
+
+      const priceInput = screen.getByDisplayValue(product.price);
+      const newPrice = '123.00';
+      await user.clear(priceInput);
+      await user.type(priceInput, newPrice);
+      await user.click(screen.getByText('Save'));
+
+      expect(
+        screen.getByText(`Price ${newPrice} for '${product.title}' updated`)
+      ).toBeInTheDocument();
+
+      await waitFor(() => screen.getByText(`$${newPrice}`));
+      expect(screen.queryByText(`$${product.price}`)).not.toBeInTheDocument();
     });
   });
 });
