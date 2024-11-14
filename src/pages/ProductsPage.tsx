@@ -1,4 +1,4 @@
-import { Box, Container, Stack, TextField, Typography } from '@mui/material';
+import { Container, Stack, Typography } from '@mui/material';
 import {
   DataGrid,
   GridActionsCellItem,
@@ -8,13 +8,13 @@ import {
 import { Footer } from '../components/Footer';
 import { MainAppBar } from '../components/MainAppBar';
 import styled from '@emotion/styled';
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { useReload } from '../hooks/useReload';
 import { type Product, StoreApi } from '../api/StoreApi';
 import { type Notification, ToastNotification } from '../components/ToastNotification';
 import { ProductImage } from '../components/ProductImage';
+import { UpdatePriceModal } from '../components/UpdatePriceModal';
 
 const baseColumn: Partial<GridColDef<Product>> = {
   disableColumnMenu: true,
@@ -28,11 +28,8 @@ export const ProductsPage: React.FC = () => {
   const [reloadKey, reload] = useReload();
 
   const [products, setProducts] = useState<Product[]>([]);
-
   const [notification, setNotification] = useState<Notification>();
-
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
-  const [priceError, setPriceError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     storeApi.getAll().then(response => {
@@ -69,31 +66,6 @@ export const ProductsPage: React.FC = () => {
     },
     [currentUser]
   );
-
-  const cancelEditPrice = useCallback(() => {
-    setEditingProduct(undefined);
-  }, []);
-
-  function handleChangePrice(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
-    if (!editingProduct) return;
-
-    const isValidNumber = !isNaN(+event.target.value);
-    setEditingProduct({ ...editingProduct, price: event.target.value });
-
-    const priceRegex = /^\d+(\.\d{1,2})?$/;
-
-    if (!isValidNumber) {
-      setPriceError('Only numbers are allowed');
-    } else {
-      if (!priceRegex.test(event.target.value)) {
-        setPriceError('Invalid price format');
-      } else if (+event.target.value > 999.99) {
-        setPriceError('The max possible price is 999.99');
-      } else {
-        setPriceError(undefined);
-      }
-    }
-  }
 
   async function saveEditPrice(): Promise<void> {
     if (editingProduct) {
@@ -212,29 +184,11 @@ export const ProductsPage: React.FC = () => {
       />
 
       {editingProduct && (
-        <ConfirmationDialog
-          isOpen={true}
-          title={'Update price'}
-          onSave={saveEditPrice}
-          onCancel={cancelEditPrice}
-        >
-          <Stack direction="row">
-            <Box width={250}>
-              <ProductImage src={editingProduct.image} />
-            </Box>
-
-            <Stack direction="column" justifyContent="space-evenly">
-              <Typography variant="body1">{editingProduct.title}</Typography>
-              <TextField
-                label={'Price'}
-                value={editingProduct.price}
-                onChange={handleChangePrice}
-                error={priceError !== undefined}
-                helperText={priceError}
-              />
-            </Stack>
-          </Stack>
-        </ConfirmationDialog>
+        <UpdatePriceModal
+          editingProduct={editingProduct}
+          setEditingProduct={setEditingProduct}
+          saveEditPrice={saveEditPrice}
+        />
       )}
     </Stack>
   );
