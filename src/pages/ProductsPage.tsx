@@ -40,26 +40,26 @@ export const ProductsPage: React.FC = () => {
     fetchProducts();
   }, [reloadKey]);
 
+  const displayError = (message: string) => {
+    setNotification({ message, type: 'error' });
+  };
+
+  const displaySucess = (message: string) => {
+    setNotification({ message, type: 'success' });
+  };
+
   const updatingQuantity = useCallback(
     async (id: number) => {
-      if (id) {
-        if (!currentUser.isAdmin) {
-          setNotification({
-            message: 'Only admin users can edit the price of a product',
-            type: 'error',
-          });
-          return;
-        }
-
+      if (!id) return;
+      if (currentUser.isAdmin) {
         try {
           const product = await storeApi.get(id);
           setEditingProduct(product);
         } catch (error) {
-          setNotification({
-            message: `Product with id ${id} not found`,
-            type: 'error',
-          });
+          displayError(`Product with id ${id} not found`);
         }
+      } else {
+        displayError('Only admin users can edit the price of a product');
       }
     },
     [currentUser]
@@ -74,16 +74,11 @@ export const ProductsPage: React.FC = () => {
 
       try {
         await storeApi.post(editedRemoteProduct);
-
-        setNotification({
-          message: `Price ${editingProduct.price} for '${editingProduct.title}' updated`,
-          type: 'success',
-        });
+        displaySucess(`Price ${editingProduct.price} for '${editingProduct.title}' updated`);
       } catch (error) {
-        setNotification({
-          message: `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`,
-          type: 'error',
-        });
+        displayError(
+          `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`
+        );
       } finally {
         setEditingProduct(undefined);
         reload();
