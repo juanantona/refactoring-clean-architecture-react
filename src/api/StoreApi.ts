@@ -11,8 +11,14 @@ export class StoreApi {
     return remoteProduct;
   }
 
-  async post(productToUpdate: Product): Promise<void> {
-    const existedProduct = await this.getProduct(productToUpdate.id);
+  async post(product: Product): Promise<void> {
+    const existedProduct = await this.getProduct(product.id);
+
+    const productToUpdate = {
+      ...product,
+      price: formatProductPrice(Number(product.price)),
+      status: setProductStatus(Number(product.price)),
+    };
 
     if (existedProduct) {
       this.cache = this.cache.map(product => {
@@ -71,15 +77,23 @@ export interface Product {
   status: 'active' | 'inactive';
 }
 
+function setProductStatus(price: number): Product['status'] {
+  return price === 0 ? 'inactive' : 'active';
+}
+
+export function formatProductPrice(price: number): string {
+  return price.toLocaleString('en-US', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  });
+}
+
 export function parseRemoteProduct(remoteProduct: RemoteProduct): Product {
   return {
     id: remoteProduct.id,
     title: remoteProduct.title,
     image: remoteProduct.image,
-    price: remoteProduct.price.toLocaleString('en-US', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    }),
-    status: remoteProduct.price === 0 ? 'inactive' : 'active',
+    price: formatProductPrice(remoteProduct.price),
+    status: setProductStatus(remoteProduct.price),
   };
 }
