@@ -4,21 +4,15 @@ import userEvent from '@testing-library/user-event';
 
 import { ProductsPage } from './ProductsPage';
 import { AppProvider } from '../context/AppProvider';
-import { StoreApi } from '../api/StoreApi';
+import { type Product, StoreApi } from '../api/StoreApi';
 
-const oneProduct = (productData?: { price?: number }) => {
+const oneProduct = (productData?: { price?: string }): Product => {
   return {
     id: 1,
     title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
-    price: productData?.price ?? 109.95,
-    description:
-      'Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday',
-    category: "men's clothing",
+    price: productData?.price ?? '109.95',
     image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
-    rating: {
-      rate: 3.9,
-      count: 120,
-    },
+    status: 'active',
   };
 };
 
@@ -67,24 +61,6 @@ describe('Products Page', () => {
 
       expect(screen.getByText(product.title)).toBeInTheDocument();
       expect(screen.getByText(`$${product.price}`)).toBeInTheDocument();
-    });
-
-    it('Should display the active tag when the product price is avobe 0', async () => {
-      const product = oneProduct();
-      getAllProductsSpy.mockResolvedValue([product]);
-
-      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
-
-      expect(screen.getByText('active')).toBeInTheDocument();
-    });
-
-    it('Should display the inactive tag when the product price is 0', async () => {
-      const product = oneProduct({ price: 0 });
-      getAllProductsSpy.mockResolvedValue([product]);
-
-      await act(async () => render(<ProductsPage />, { wrapper: AppProvider }));
-
-      expect(screen.getByText('inactive')).toBeInTheDocument();
     });
   });
 

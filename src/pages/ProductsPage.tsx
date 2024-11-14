@@ -12,7 +12,7 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { useReload } from '../hooks/useReload';
-import { RemoteProduct, StoreApi } from '../api/StoreApi';
+import { type Product, StoreApi } from '../api/StoreApi';
 import { type Notification, ToastNotification } from '../components/ToastNotification';
 import { ProductImage } from '../components/ProductImage';
 
@@ -38,10 +38,7 @@ export const ProductsPage: React.FC = () => {
     storeApi.getAll().then(response => {
       console.debug('Reloading', reloadKey);
 
-      const remoteProducts = response as RemoteProduct[];
-
-      const products = remoteProducts.map(buildProduct);
-
+      const products = response as Product[];
       setProducts(products);
     });
   }, [reloadKey]);
@@ -59,7 +56,6 @@ export const ProductsPage: React.FC = () => {
 
         storeApi
           .get(id)
-          .then(buildProduct)
           .then(product => {
             setEditingProduct(product);
           })
@@ -101,14 +97,10 @@ export const ProductsPage: React.FC = () => {
 
   async function saveEditPrice(): Promise<void> {
     if (editingProduct) {
-      const remoteProduct = await storeApi.get(editingProduct.id);
+      const product = await storeApi.get(editingProduct.id);
+      if (!product) return;
 
-      if (!remoteProduct) return;
-
-      const editedRemoteProduct = {
-        ...remoteProduct,
-        price: Number(editingProduct.price),
-      };
+      const editedRemoteProduct = { ...product, price: editingProduct.price };
 
       try {
         await storeApi.post(editedRemoteProduct);
@@ -253,17 +245,7 @@ const MainContainer = styled(Container)`
   flex: 1;
 `;
 
-type ProductStatus = 'active' | 'inactive';
-
-export interface Product {
-  id: number;
-  title: string;
-  image: string;
-  price: string;
-  status: ProductStatus;
-}
-
-const StatusContainer = styled.div<{ status: ProductStatus }>`
+const StatusContainer = styled.div<{ status: Product['status'] }>`
   background: ${props => (props.status === 'inactive' ? 'red' : 'green')};
   display: flex;
   flex-direction: column;
@@ -273,16 +255,3 @@ const StatusContainer = styled.div<{ status: ProductStatus }>`
   border-radius: 20px;
   width: 100px;
 `;
-
-function buildProduct(remoteProduct: RemoteProduct): Product {
-  return {
-    id: remoteProduct.id,
-    title: remoteProduct.title,
-    image: remoteProduct.image,
-    price: remoteProduct.price.toLocaleString('en-US', {
-      maximumFractionDigits: 2,
-      minimumFractionDigits: 2,
-    }),
-    status: remoteProduct.price === 0 ? 'inactive' : 'active',
-  };
-}
