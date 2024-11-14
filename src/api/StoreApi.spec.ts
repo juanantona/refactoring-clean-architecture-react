@@ -1,4 +1,4 @@
-import { StoreApi } from './StoreApi';
+import { StoreApi, parseRemoteProduct } from './StoreApi';
 
 const oneProduct = (productData: { id: number; price?: number }) => {
   return {
@@ -46,7 +46,7 @@ describe('StoreAPi', () => {
 
       const products = await api.getAll();
 
-      expect(products).toEqual([productOne, productTwo]);
+      expect(products).toEqual([parseRemoteProduct(productOne), parseRemoteProduct(productTwo)]);
     });
 
     it('Should populate the cache', async () => {
@@ -57,8 +57,8 @@ describe('StoreAPi', () => {
       const firstCallProducts = await api.getAll();
       const secondCallProducts = await api.getAll();
 
-      expect(firstCallProducts).toEqual([productOne]);
-      expect(secondCallProducts).toEqual([productOne]);
+      expect(firstCallProducts).toEqual([parseRemoteProduct(productOne)]);
+      expect(secondCallProducts).toEqual([parseRemoteProduct(productOne)]);
       expect(mockedFetch).toHaveBeenCalledTimes(1);
     });
   });
@@ -72,7 +72,7 @@ describe('StoreAPi', () => {
 
       const product = await api.get(2);
 
-      expect(product).toEqual(productTwo);
+      expect(product).toEqual(parseRemoteProduct(productTwo));
     });
   });
 });
