@@ -14,6 +14,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { useReload } from '../hooks/useReload';
 import { RemoteProduct, StoreApi } from '../api/StoreApi';
 import { type Notification, ToastNotification } from '../components/ToastNotification';
+import { ProductImage } from '../components/ProductImage';
 
 const baseColumn: Partial<GridColDef<Product>> = {
   disableColumnMenu: true,
@@ -254,12 +255,6 @@ export const ProductsPage: React.FC = () => {
 const MainContainer = styled(Container)`
   padding: 32px 0px;
   flex: 1;
-`;
-
-const ProductImage = styled.img`
-  width: 200px;
-  height: 200px;
-  object-fit: contain;
 `;
 
 type ProductStatus = 'active' | 'inactive';
