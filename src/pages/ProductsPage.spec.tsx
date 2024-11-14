@@ -33,6 +33,10 @@ const oneProduct = (productData?: { price?: string; status?: Product['status'] }
 //  - Si el precio es cero se muestra la etiqueta inactive en rojo
 //  - Si el precio es mayor que cero se muestra la etiqueta active en verde
 
+const wrappedRender = (component: React.ReactElement) => {
+  return render(component, { wrapper: AppProvider });
+};
+
 describe('Products Page', () => {
   const getProductsMock = jest.fn();
   const fetchMock = jest.fn(() =>
@@ -54,7 +58,7 @@ describe('Products Page', () => {
       const api = new StoreApi();
       getProductsMock.mockResolvedValue([]);
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.getByText('Refactoring a Clean Architecture in React')).toBeInTheDocument();
     });
@@ -66,7 +70,7 @@ describe('Products Page', () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.getByText(product.title)).toBeInTheDocument();
       expect(screen.getByText(`$${product.price}`)).toBeInTheDocument();
@@ -80,7 +84,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.queryByText('User: Non admin user')).not.toBeInTheDocument();
 
@@ -100,7 +104,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       const userButton = screen.getByText('User:', { exact: false });
       await user.click(userButton);
@@ -125,7 +129,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -145,7 +149,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -168,7 +172,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -191,7 +195,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => render(<ProductsPage storeApi={api} />, { wrapper: AppProvider }));
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
