@@ -83,6 +83,8 @@ export const ProductsPage: React.FC = () => {
     const isValidNumber = !isNaN(+event.target.value);
     setEditingProduct({ ...editingProduct, price: event.target.value });
 
+    const priceRegex = /^\d+(\.\d{1,2})?$/;
+
     if (!isValidNumber) {
       setPriceError('Only numbers are allowed');
     } else {
@@ -291,5 +293,3 @@ function buildProduct(remoteProduct: RemoteProduct): Product {
     }),
   };
 }
-
-const priceRegex = /^\d+(\.\d{1,2})?$/;
