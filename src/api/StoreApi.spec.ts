@@ -61,9 +61,23 @@ describe('StoreAPi', () => {
       expect(secondCallProducts).toEqual([parseRemoteProduct(productOne)]);
       expect(mockedFetch).toHaveBeenCalledTimes(1);
     });
+
+    it('Should parse properly the remote product', async () => {
+      const productOne = oneProduct({ id: 1, price: 2 });
+      const productTwo = oneProduct({ id: 1, price: 0 });
+      const api = new StoreApi();
+      mockedFetch.mockResolvedValueOnce([productOne, productTwo]);
+
+      const products = await api.getAll();
+
+      expect(products[0].price).toEqual('2.00');
+      expect(products[0].status).toEqual('active');
+      expect(products[1].price).toEqual('0.00');
+      expect(products[1].status).toEqual('inactive');
+    });
   });
 
-  describe('When call getAll', () => {
+  describe('When call get', () => {
     it('Should return the proper product acording the id provided', async () => {
       const productOne = oneProduct({ id: 1 });
       const productTwo = oneProduct({ id: 2, price: 10 });
