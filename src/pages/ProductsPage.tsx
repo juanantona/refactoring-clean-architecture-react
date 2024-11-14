@@ -32,12 +32,12 @@ export const ProductsPage: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
 
   useEffect(() => {
-    storeApi.getAll().then(response => {
+    async function fetchProducts() {
+      const products = await storeApi.getAll();
       console.debug('Reloading', reloadKey);
-
-      const products = response as Product[];
       setProducts(products);
-    });
+    }
+    fetchProducts();
   }, [reloadKey]);
 
   const updatingQuantity = useCallback(
@@ -51,17 +51,15 @@ export const ProductsPage: React.FC = () => {
           return;
         }
 
-        storeApi
-          .get(id)
-          .then(product => {
-            setEditingProduct(product);
-          })
-          .catch(() => {
-            setNotification({
-              message: `Product with id ${id} not found`,
-              type: 'error',
-            });
+        try {
+          const product = await storeApi.get(id);
+          setEditingProduct(product);
+        } catch (error) {
+          setNotification({
+            message: `Product with id ${id} not found`,
+            type: 'error',
           });
+        }
       }
     },
     [currentUser]
@@ -81,13 +79,12 @@ export const ProductsPage: React.FC = () => {
           message: `Price ${editingProduct.price} for '${editingProduct.title}' updated`,
           type: 'success',
         });
-        setEditingProduct(undefined);
-        reload();
       } catch (error) {
         setNotification({
           message: `An error has ocurred updating the price ${editingProduct.price} for '${editingProduct.title}'`,
           type: 'error',
         });
+      } finally {
         setEditingProduct(undefined);
         reload();
       }
