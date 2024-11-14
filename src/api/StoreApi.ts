@@ -1,17 +1,17 @@
 export class StoreApi {
-  cache: RemoteProduct[] = [];
+  cache: Product[] = [];
 
-  async getAll(): Promise<RemoteProduct[]> {
+  async getAll(): Promise<Product[]> {
     return this.getProducts();
   }
 
-  async get(id: number): Promise<RemoteProduct> {
+  async get(id: number): Promise<Product> {
     const remoteProduct = await this.getProduct(id);
 
     return remoteProduct;
   }
 
-  async post(productToUpdate: RemoteProduct): Promise<void> {
+  async post(productToUpdate: Product): Promise<void> {
     const existedProduct = await this.getProduct(productToUpdate.id);
 
     if (existedProduct) {
@@ -23,10 +23,12 @@ export class StoreApi {
     }
   }
 
-  private async getProducts(): Promise<RemoteProduct[]> {
+  private async getProducts(): Promise<Product[]> {
     //fakestoreapi is a not real database then we update the cache
     if (this.cache.length === 0) {
-      const products = await fetch('https://fakestoreapi.com/products').then(res => res.json());
+      const products: RemoteProduct[] = await fetch('https://fakestoreapi.com/products').then(res =>
+        res.json()
+      );
       const parsedRemoteProducts = products.map(parseRemoteProduct);
       this.cache = parsedRemoteProducts;
       return parsedRemoteProducts;
@@ -35,7 +37,7 @@ export class StoreApi {
     }
   }
 
-  private async getProduct(id: number): Promise<RemoteProduct> {
+  private async getProduct(id: number): Promise<Product> {
     //fakestoreapi is a not real database then we update the cache
     if (this.cache.length === 0) {
       await this.getAll();
@@ -61,14 +63,12 @@ export interface RemoteProduct {
   rating: { rate: number; count: number };
 }
 
-export type ProductStatus = 'active' | 'inactive';
-
 export interface Product {
   id: number;
   title: string;
   image: string;
   price: string;
-  status: ProductStatus;
+  status: 'active' | 'inactive';
 }
 
 export function parseRemoteProduct(remoteProduct: RemoteProduct): Product {
