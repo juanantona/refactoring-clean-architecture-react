@@ -6,13 +6,13 @@ import { ProductsPage } from './ProductsPage';
 import { AppProvider } from '../context/AppProvider';
 import { type Product, StoreApi } from '../api/StoreApi';
 
-const oneProduct = (productData?: { price?: string }): Product => {
+const oneProduct = (productData?: { price?: string; status?: Product['status'] }): Product => {
   return {
     id: 1,
     title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
     price: productData?.price ?? '109.95',
     image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
-    status: 'active',
+    status: productData?.status ?? 'active',
   };
 };
 
@@ -201,10 +201,10 @@ describe('Products Page', () => {
     it('Should update the price if the input value is correct', async () => {
       const user = userEvent.setup();
       const product = oneProduct();
-      const newPrice = '123.95';
-      const updatedProduct = oneProduct({ price: Number(newPrice) });
-      getAllProductsSpy.mockResolvedValueOnce([product]).mockResolvedValue([updatedProduct]);
-      getProductSpy.mockResolvedValueOnce(product).mockResolvedValueOnce(updatedProduct);
+      const newPrice = '123';
+      const updatedProduct = oneProduct({ price: `${newPrice}.00` });
+      getAllProductsSpy.mockResolvedValueOnce([product]).mockResolvedValueOnce([updatedProduct]);
+      getProductSpy.mockResolvedValue(product);
       postProductSpy.mockImplementationOnce(() => Promise.resolve());
 
       await act(async () => {
@@ -228,8 +228,42 @@ describe('Products Page', () => {
         screen.getByText(`Price ${newPrice} for '${updatedProduct.title}' updated`)
       ).toBeInTheDocument();
 
-      await waitFor(() => screen.getByText(`$${newPrice}`));
+      await waitFor(() => screen.getByText('$123.00'));
       expect(screen.queryByText(`$${product.price}`)).not.toBeInTheDocument();
     });
+
+    it('Should update the status tag to inactive if the updated price is 0', async () => {
+      const user = userEvent.setup();
+      const product = oneProduct();
+      const newPrice = '0';
+      const updatedProduct = oneProduct({ price: `${newPrice}.00`, status: 'inactive' });
+      getAllProductsSpy.mockResolvedValueOnce([product]).mockResolvedValueOnce([updatedProduct]);
+      getProductSpy.mockResolvedValue(product);
+      postProductSpy.mockImplementationOnce(() => Promise.resolve());
+
+      await act(async () => {
+        render(<ProductsPage />, { wrapper: AppProvider });
+      });
+
+      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
+
+      const actionsControl = screen.getByLabelText('more');
+      await user.click(actionsControl);
+      const updatePriceButton = screen.getByText('Update price');
+      expect(updatePriceButton).toBeInTheDocument();
+      await user.click(updatePriceButton);
+
+      const priceInput = screen.getByDisplayValue(product.price);
+      await user.clear(priceInput);
+      await user.type(priceInput, newPrice);
+      await user.click(screen.getByText('Save'));
+
+      expect(
+        screen.getByText(`Price ${newPrice} for '${updatedProduct.title}' updated`)
+      ).toBeInTheDocument();
+
+      await waitFor(() => screen.getByText('inactive'));
+      expect(screen.queryByText('active')).not.toBeInTheDocument();
+    }, 100000);
   });
 });
