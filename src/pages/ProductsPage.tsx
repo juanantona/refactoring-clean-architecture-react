@@ -21,9 +21,11 @@ const baseColumn: Partial<GridColDef<Product>> = {
   sortable: false,
 };
 
-const storeApi = new StoreApi();
+type ProductsPageProps = {
+  storeApi: StoreApi;
+};
 
-export const ProductsPage: React.FC = () => {
+export const ProductsPage: React.FC<ProductsPageProps> = ({ storeApi }: { storeApi: StoreApi }) => {
   const { currentUser } = useAppContext();
   const [reloadKey, reload] = useReload();
 
@@ -38,7 +40,7 @@ export const ProductsPage: React.FC = () => {
       setProducts(products);
     }
     fetchProducts();
-  }, [reloadKey]);
+  }, [reloadKey, storeApi]);
 
   const displayError = (message: string) => {
     setNotification({ message, type: 'error' });
@@ -62,7 +64,7 @@ export const ProductsPage: React.FC = () => {
         displayError('Only admin users can edit the price of a product');
       }
     },
-    [currentUser]
+    [currentUser, storeApi]
   );
 
   async function saveEditPrice(): Promise<void> {
