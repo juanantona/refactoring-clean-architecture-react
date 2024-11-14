@@ -167,15 +167,11 @@ export const ProductsPage: React.FC = () => {
         width: 120,
         headerAlign: 'center',
         align: 'center',
-        renderCell: params => {
-          const status = +params.row.price === 0 ? 'inactive' : 'active';
-
-          return (
-            <StatusContainer status={status}>
-              <Typography variant="body1">{status}</Typography>
-            </StatusContainer>
-          );
-        },
+        renderCell: params => (
+          <StatusContainer status={params.row.status}>
+            <Typography variant="body1">{params.row.status}</Typography>
+          </StatusContainer>
+        ),
       },
       {
         ...baseColumn,
@@ -264,6 +260,7 @@ export interface Product {
   title: string;
   image: string;
   price: string;
+  status: ProductStatus;
 }
 
 const StatusContainer = styled.div<{ status: ProductStatus }>`
@@ -286,5 +283,6 @@ function buildProduct(remoteProduct: RemoteProduct): Product {
       maximumFractionDigits: 2,
       minimumFractionDigits: 2,
     }),
+    status: remoteProduct.price === 0 ? 'inactive' : 'active',
   };
 }
