@@ -6,9 +6,13 @@ import { ProductsPage } from './ProductsPage';
 import { AppProvider } from '../context/AppProvider';
 import { type Product, StoreApi } from '../api/StoreApi';
 
-const oneProduct = (productData?: { price?: string; status?: Product['status'] }): Product => {
+const oneProduct = (productData?: {
+  id?: number;
+  price?: string;
+  status?: Product['status'];
+}): Product => {
   return {
-    id: 1,
+    id: productData?.id ?? 1,
     title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
     price: productData?.price ?? '109.95',
     image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
@@ -61,6 +65,30 @@ describe('Products Page', () => {
       await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
 
       expect(screen.getByText('Refactoring a Clean Architecture in React')).toBeInTheDocument();
+    });
+  });
+
+  describe('When there is no products available ', () => {
+    it('Should display an amount of products equal to 0', async () => {
+      const api = new StoreApi();
+      getProductsMock.mockResolvedValue([]);
+
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
+
+      expect(screen.getByText('0–0 of 0')).toBeInTheDocument();
+    });
+  });
+
+  describe('When there are products available ', () => {
+    it('Should display the amount of products', async () => {
+      const api = new StoreApi();
+      const productOne = oneProduct({ id: 1 });
+      const productTwo = oneProduct({ id: 2 });
+      getProductsMock.mockResolvedValue([productOne, productTwo]);
+
+      await act(async () => wrappedRender(<ProductsPage storeApi={api} />));
+
+      expect(screen.getByText('1–2 of 2')).toBeInTheDocument();
     });
   });
 
