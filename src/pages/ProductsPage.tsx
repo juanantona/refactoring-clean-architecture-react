@@ -67,7 +67,7 @@ export const ProductsPage: React.FC = () => {
   return (
     <Stack direction="column" sx={{ minHeight: '100vh', overflow: 'scroll' }}>
       <MainAppBar />
-      <ProductsList storeApi={storeApi} updatingQuantity={updatingQuantity} reloadKey={reloadKey} />
+      <ProductsList updatingQuantity={updatingQuantity} reloadKey={reloadKey} />
       <Footer />
 
       <ToastNotification

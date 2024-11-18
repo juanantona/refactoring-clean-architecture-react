@@ -7,8 +7,9 @@ import {
   GridValueFormatterParams,
 } from '@mui/x-data-grid';
 import styled from '@emotion/styled';
-import { type Product, StoreApi } from '../api/StoreApi';
+import { type Product } from '../api/StoreApi';
 import { ProductImage } from '../components/ProductImage';
+import { useAppContext } from '../context/useAppContext';
 
 const baseColumn: Partial<GridColDef<Product>> = {
   disableColumnMenu: true,
@@ -17,12 +18,12 @@ const baseColumn: Partial<GridColDef<Product>> = {
 
 type Props = {
   reloadKey: string;
-  storeApi: StoreApi;
   updatingQuantity: (productId: number) => void;
 };
 
 export const ProductsList = (props: Props): React.ReactElement => {
-  const { storeApi, updatingQuantity, reloadKey } = props;
+  const { updatingQuantity, reloadKey } = props;
+  const { storeApi } = useAppContext();
 
   const [products, setProducts] = useState<Product[]>([]);
 
