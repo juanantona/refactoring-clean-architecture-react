@@ -1,5 +1,5 @@
-import { Typography } from '@mui/material';
-import { useMemo } from 'react';
+import { Container, Typography } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
 import {
   DataGrid,
   GridActionsCellItem,
@@ -7,7 +7,7 @@ import {
   GridValueFormatterParams,
 } from '@mui/x-data-grid';
 import styled from '@emotion/styled';
-import { type Product } from '../api/StoreApi';
+import { type Product, StoreApi } from '../api/StoreApi';
 import { ProductImage } from '../components/ProductImage';
 
 const baseColumn: Partial<GridColDef<Product>> = {
@@ -16,12 +16,24 @@ const baseColumn: Partial<GridColDef<Product>> = {
 };
 
 type Props = {
-  products: Product[];
+  reloadKey: string;
+  storeApi: StoreApi;
   updatingQuantity: (productId: number) => void;
 };
 
 export const ProductsList = (props: Props): React.ReactElement => {
-  const { products, updatingQuantity } = props;
+  const { storeApi, updatingQuantity, reloadKey } = props;
+
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      const products = await storeApi.getAll();
+      console.debug('Reloading', reloadKey);
+      setProducts(products);
+    }
+    fetchProducts();
+  }, [reloadKey, storeApi]);
 
   const columns: GridColDef<Product>[] = useMemo(
     () => [
@@ -85,20 +97,30 @@ export const ProductsList = (props: Props): React.ReactElement => {
   );
 
   return (
-    <DataGrid<Product>
-      rowHeight={300}
-      rows={products}
-      columns={columns}
-      initialState={{
-        pagination: {
-          paginationModel: { page: 0, pageSize: 5 },
-        },
-      }}
-      pageSizeOptions={[5, 10]}
-      columnBuffer={6}
-    />
+    <MainContainer maxWidth="xl" sx={{ flex: 1 }}>
+      <Typography variant="h3" component="h1" gutterBottom>
+        {'Product price updater'}
+      </Typography>
+      <DataGrid<Product>
+        rowHeight={300}
+        rows={products}
+        columns={columns}
+        initialState={{
+          pagination: {
+            paginationModel: { page: 0, pageSize: 5 },
+          },
+        }}
+        pageSizeOptions={[5, 10]}
+        columnBuffer={6}
+      />
+    </MainContainer>
   );
 };
+
+const MainContainer = styled(Container)`
+  padding: 32px 0px;
+  flex: 1;
+`;
 
 const StatusContainer = styled.div<{ status: Product['status'] }>`
   background: ${props => (props.status === 'inactive' ? 'red' : 'green')};
