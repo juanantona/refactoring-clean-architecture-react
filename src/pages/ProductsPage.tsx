@@ -5,18 +5,14 @@ import { MainAppBar } from '../components/MainAppBar';
 import { useCallback, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
 import { useReload } from '../hooks/useReload';
-import { type Product, StoreApi } from '../api/StoreApi';
+import { type Product } from '../api/StoreApi';
 import { type Notification, ToastNotification } from '../components/ToastNotification';
 
 import { UpdatePriceModal } from '../components/UpdatePriceModal';
 import { ProductsList } from '../components/ProductsList';
 
-type ProductsPageProps = {
-  storeApi: StoreApi;
-};
-
-export const ProductsPage: React.FC<ProductsPageProps> = ({ storeApi }: { storeApi: StoreApi }) => {
-  const { currentUser } = useAppContext();
+export const ProductsPage: React.FC = () => {
+  const { currentUser, storeApi } = useAppContext();
   const [reloadKey, reload] = useReload();
 
   const [notification, setNotification] = useState<Notification>();
