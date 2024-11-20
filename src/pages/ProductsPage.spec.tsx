@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ProductsPage } from './ProductsPage';
@@ -67,7 +67,17 @@ describe('Products Page', () => {
     });
   });
 
-  describe('When there is no products available ', () => {
+  describe('When there is no available products', () => {
+    it('Should display just the header of the table with the proper column names', async () => {
+      getProductsMock.mockResolvedValue([]);
+
+      await act(async () => wrappedRender(<ProductsPage />));
+
+      const rows = screen.getAllByRole('row');
+      expect(rows).toHaveLength(1);
+      verifyTableHeader(rows[0]);
+    });
+
     it('Should display an amount of products equal to 0', async () => {
       getProductsMock.mockResolvedValue([]);
 
@@ -293,3 +303,13 @@ describe('Products Page', () => {
     });
   });
 });
+
+function verifyTableHeader(header: HTMLElement) {
+  const cells = within(header).getAllByRole('columnheader');
+  expect(cells).toHaveLength(6);
+  within(cells[0]).getByText('ID');
+  within(cells[1]).getByText('Title');
+  within(cells[2]).getByText('Image');
+  within(cells[3]).getByText('Price');
+  within(cells[4]).getByText('Status');
+}
