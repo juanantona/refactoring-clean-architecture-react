@@ -13,9 +13,9 @@ const oneProduct = (productData?: {
 }): Product => {
   return {
     id: productData?.id ?? 1,
-    title: 'Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops',
-    price: productData?.price ?? '109.95',
-    image: 'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
+    title: `Product: ${productData?.id ?? 1}`,
+    price: productData?.price ?? '100.00',
+    image: 'https://api.com/img/1.jpg',
     status: productData?.status ?? 'active',
   };
 };
@@ -88,6 +88,19 @@ describe('Products Page', () => {
   });
 
   describe('When there are products available ', () => {
+    it('Should display each row with the proper data', async () => {
+      const productOne = oneProduct({ id: 1 });
+      const productTwo = oneProduct({ id: 2 });
+      getProductsMock.mockResolvedValue([productOne, productTwo]);
+
+      await act(async () => wrappedRender(<ProductsPage />));
+
+      const rows = screen.getAllByRole('row');
+      expect(rows).toHaveLength(3);
+      verifyProductTableRow(productOne, rows[1]);
+      verifyProductTableRow(productTwo, rows[2]);
+    });
+
     it('Should display the amount of products', async () => {
       const productOne = oneProduct({ id: 1 });
       const productTwo = oneProduct({ id: 2 });
@@ -96,18 +109,6 @@ describe('Products Page', () => {
       await act(async () => wrappedRender(<ProductsPage />));
 
       expect(screen.getByText('1–2 of 2')).toBeInTheDocument();
-    });
-  });
-
-  describe('When there is one product available ', () => {
-    it('Should display the title and the price of the product', async () => {
-      const product = oneProduct();
-      getProductsMock.mockResolvedValue([product]);
-
-      await act(async () => wrappedRender(<ProductsPage />));
-
-      expect(screen.getByText(product.title)).toBeInTheDocument();
-      expect(screen.getByText(`$${product.price}`)).toBeInTheDocument();
     });
   });
 
@@ -303,6 +304,15 @@ describe('Products Page', () => {
     });
   });
 });
+
+function verifyProductTableRow(product: Product, row: HTMLElement) {
+  const productOneCells = within(row).getAllByRole('cell');
+  within(productOneCells[0]).getByText(product.id);
+  within(productOneCells[1]).getByText(product.title);
+  within(productOneCells[2]).getByRole('img');
+  within(productOneCells[3]).getByText(`$${product.price}`);
+  within(productOneCells[4]).getByText(product.status);
+}
 
 function verifyTableHeader(header: HTMLElement) {
   const cells = within(header).getAllByRole('columnheader');
