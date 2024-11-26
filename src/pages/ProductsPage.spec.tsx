@@ -61,9 +61,12 @@ describe('Products Page', () => {
     it('Should showcase the page title', async () => {
       getProductsMock.mockResolvedValue([]);
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('Refactoring a Clean Architecture in React')).toBeInTheDocument();
+      await act(async () => {
+        await getProductsMock();
+      });
     });
   });
 
@@ -71,18 +74,19 @@ describe('Products Page', () => {
     it('Should display just the header of the table with the proper column names', async () => {
       getProductsMock.mockResolvedValue([]);
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
-      const rows = screen.getAllByRole('row');
-      expect(rows).toHaveLength(1);
-      verifyTableHeader(rows[0]);
+      await waitForTableHeaderLoaded();
+      const [header] = screen.getAllByRole('row');
+      verifyTableHeader(header);
     });
 
     it('Should display an amount of products equal to 0', async () => {
       getProductsMock.mockResolvedValue([]);
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
+      await waitForTableHeaderLoaded();
       expect(screen.getByText('0–0 of 0')).toBeInTheDocument();
     });
   });
@@ -304,6 +308,12 @@ describe('Products Page', () => {
     });
   });
 });
+
+async function waitForTableHeaderLoaded() {
+  await waitFor(async () => {
+    expect(await screen.findAllByRole('row')).toHaveLength(1);
+  });
+}
 
 function verifyProductTableRow(product: Product, row: HTMLElement) {
   const productOneCells = within(row).getAllByRole('cell');
