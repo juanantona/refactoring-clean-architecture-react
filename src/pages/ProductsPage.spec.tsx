@@ -141,16 +141,10 @@ describe('Products Page', () => {
 
       wrappedRender(<ProductsPage />);
 
-      const userButton = screen.getByText('User:', { exact: false });
-      await user.click(userButton);
-      await user.click(screen.getByText('Non admin user'));
-
-      const actionsControl = screen.getByLabelText('more');
-      await user.click(actionsControl);
-      const updatePriceButton = screen.getByText('Update price');
-      expect(updatePriceButton).toBeInTheDocument();
-      await user.click(updatePriceButton);
-
+      await setNonAdminUser(user);
+      await waitForTableRowsLoaded();
+      const [, ...rows] = screen.getAllByRole('row');
+      await clickUpdatePrice(rows[0], user);
       expect(
         screen.getByText('Only admin users can edit the price of a product')
       ).toBeInTheDocument();
@@ -168,11 +162,8 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const actionsControl = screen.getByLabelText('more');
-      await user.click(actionsControl);
-      const updatePriceButton = screen.getByText('Update price');
-      expect(updatePriceButton).toBeInTheDocument();
-      await user.click(updatePriceButton);
+      const [, ...rows] = screen.getAllByRole('row');
+      await clickUpdatePrice(rows[0], user);
 
       const priceInput = screen.queryByDisplayValue(product.price);
       expect(priceInput).toBeInTheDocument();
@@ -188,11 +179,8 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const actionsControl = screen.getByLabelText('more');
-      await user.click(actionsControl);
-      const updatePriceButton = screen.getByText('Update price');
-      expect(updatePriceButton).toBeInTheDocument();
-      await user.click(updatePriceButton);
+      const [, ...rows] = screen.getAllByRole('row');
+      await clickUpdatePrice(rows[0], user);
 
       const priceInput = screen.getByDisplayValue(product.price);
       await user.clear(priceInput);
@@ -211,11 +199,8 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const actionsControl = screen.getByLabelText('more');
-      await user.click(actionsControl);
-      const updatePriceButton = screen.getByText('Update price');
-      expect(updatePriceButton).toBeInTheDocument();
-      await user.click(updatePriceButton);
+      const [, ...rows] = screen.getAllByRole('row');
+      await clickUpdatePrice(rows[0], user);
 
       const priceInput = screen.getByDisplayValue(product.price);
       await user.clear(priceInput);
@@ -234,11 +219,8 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const actionsControl = screen.getByLabelText('more');
-      await user.click(actionsControl);
-      const updatePriceButton = screen.getByText('Update price');
-      expect(updatePriceButton).toBeInTheDocument();
-      await user.click(updatePriceButton);
+      const [, ...rows] = screen.getAllByRole('row');
+      await clickUpdatePrice(rows[0], user);
 
       const priceInput = screen.getByDisplayValue(product.price);
       await user.clear(priceInput);
@@ -258,11 +240,8 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const actionsControl = screen.getByLabelText('more');
-      await user.click(actionsControl);
-      const updatePriceButton = screen.getByText('Update price');
-      expect(updatePriceButton).toBeInTheDocument();
-      await user.click(updatePriceButton);
+      const [, ...rows] = screen.getAllByRole('row');
+      await clickUpdatePrice(rows[0], user);
 
       const priceInput = screen.getByDisplayValue(product.price);
       await user.clear(priceInput);
@@ -288,11 +267,8 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const actionsControl = screen.getByLabelText('more');
-      await user.click(actionsControl);
-      const updatePriceButton = screen.getByText('Update price');
-      expect(updatePriceButton).toBeInTheDocument();
-      await user.click(updatePriceButton);
+      const [, ...rows] = screen.getAllByRole('row');
+      await clickUpdatePrice(rows[0], user);
 
       const priceInput = screen.getByDisplayValue(product.price);
       await user.clear(priceInput);
@@ -308,6 +284,14 @@ describe('Products Page', () => {
     });
   });
 });
+
+async function clickUpdatePrice(row: HTMLElement, user: UserEvent) {
+  const actionsControl = within(row).getByLabelText('more');
+  await user.click(actionsControl);
+  const updatePriceButton = screen.getByText('Update price');
+  expect(updatePriceButton).toBeInTheDocument();
+  await user.click(updatePriceButton);
+}
 
 async function setNonAdminUser(user: UserEvent) {
   const userButton = screen.getByText('User:', { exact: false });
