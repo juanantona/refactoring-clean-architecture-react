@@ -316,7 +316,8 @@ function verifyProductTableRow(product: Product, row: HTMLElement) {
   const productOneCells = within(row).getAllByRole('cell');
   within(productOneCells[0]).getByText(product.id);
   within(productOneCells[1]).getByText(product.title);
-  within(productOneCells[2]).getByRole('img');
+  const image: HTMLImageElement = within(productOneCells[2]).getByRole('img');
+  expect(image.src).toBe(product.image);
   within(productOneCells[3]).getByText(`$${product.price}`);
   within(productOneCells[4]).getByText(product.status);
 }
