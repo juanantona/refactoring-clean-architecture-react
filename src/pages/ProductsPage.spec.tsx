@@ -125,7 +125,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
       expect(screen.queryByText('User: Non admin user')).not.toBeInTheDocument();
 
@@ -144,7 +144,7 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
       const userButton = screen.getByText('User:', { exact: false });
       await user.click(userButton);
@@ -168,10 +168,11 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
+      await waitForTableRowsLoaded();
       const actionsControl = screen.getByLabelText('more');
       await user.click(actionsControl);
       const updatePriceButton = screen.getByText('Update price');
@@ -187,10 +188,11 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
+      await waitForTableRowsLoaded();
       const actionsControl = screen.getByLabelText('more');
       await user.click(actionsControl);
       const updatePriceButton = screen.getByText('Update price');
@@ -209,10 +211,11 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
+      await waitForTableRowsLoaded();
       const actionsControl = screen.getByLabelText('more');
       await user.click(actionsControl);
       const updatePriceButton = screen.getByText('Update price');
@@ -231,10 +234,11 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const user = userEvent.setup();
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
+      await waitForTableRowsLoaded();
       const actionsControl = screen.getByLabelText('more');
       await user.click(actionsControl);
       const updatePriceButton = screen.getByText('Update price');
@@ -254,12 +258,11 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const newPrice = '123';
 
-      await act(async () => {
-        render(<ProductsPage />, { wrapper: AppProvider });
-      });
+      wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
+      await waitForTableRowsLoaded();
       const actionsControl = screen.getByLabelText('more');
       await user.click(actionsControl);
       const updatePriceButton = screen.getByText('Update price');
@@ -285,12 +288,11 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
       const newPrice = '0';
 
-      await act(async () => {
-        render(<ProductsPage />, { wrapper: AppProvider });
-      });
+      wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
+      await waitForTableRowsLoaded();
       const actionsControl = screen.getByLabelText('more');
       await user.click(actionsControl);
       const updatePriceButton = screen.getByText('Update price');
