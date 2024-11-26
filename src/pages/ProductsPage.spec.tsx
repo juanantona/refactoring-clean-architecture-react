@@ -97,12 +97,14 @@ describe('Products Page', () => {
       const productTwo = oneProduct({ id: 2 });
       getProductsMock.mockResolvedValue([productOne, productTwo]);
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
-      const rows = screen.getAllByRole('row');
-      expect(rows).toHaveLength(3);
-      verifyProductTableRow(productOne, rows[1]);
-      verifyProductTableRow(productTwo, rows[2]);
+      await waitForTableRowsLoaded();
+      const [header, ...rows] = screen.getAllByRole('row');
+      verifyTableHeader(header);
+      expect(rows).toHaveLength(2);
+      verifyProductTableRow(productOne, rows[0]);
+      verifyProductTableRow(productTwo, rows[1]);
     });
 
     it('Should display the amount of products', async () => {
@@ -110,8 +112,9 @@ describe('Products Page', () => {
       const productTwo = oneProduct({ id: 2 });
       getProductsMock.mockResolvedValue([productOne, productTwo]);
 
-      await act(async () => wrappedRender(<ProductsPage />));
+      wrappedRender(<ProductsPage />);
 
+      await waitForTableRowsLoaded();
       expect(screen.getByText('1–2 of 2')).toBeInTheDocument();
     });
   });
@@ -308,6 +311,12 @@ describe('Products Page', () => {
     });
   });
 });
+
+async function waitForTableRowsLoaded() {
+  await waitFor(async () => {
+    expect((await screen.findAllByRole('row')).length).toBeGreaterThan(1);
+  });
+}
 
 async function waitForTableHeaderLoaded() {
   await waitFor(async () => {
