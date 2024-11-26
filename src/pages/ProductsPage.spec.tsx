@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { UserEvent } from '@testing-library/user-event';
 
 import { ProductsPage } from './ProductsPage';
 import { AppProvider } from '../context/AppProvider';
@@ -128,12 +128,7 @@ describe('Products Page', () => {
       wrappedRender(<ProductsPage />);
 
       expect(screen.queryByText('User: Non admin user')).not.toBeInTheDocument();
-
-      const userButton = screen.getByText('User:', { exact: false });
-      await user.click(userButton);
-      expect(screen.getByText('Non admin user')).toBeVisible();
-      await user.click(screen.getByText('Non admin user'));
-
+      await setNonAdminUser(user);
       expect(screen.getByText('User: Non admin user')).toBeInTheDocument();
     });
   });
@@ -313,6 +308,13 @@ describe('Products Page', () => {
     });
   });
 });
+
+async function setNonAdminUser(user: UserEvent) {
+  const userButton = screen.getByText('User:', { exact: false });
+  await user.click(userButton);
+  expect(screen.getByText('Non admin user')).toBeVisible();
+  await user.click(screen.getByText('Non admin user'));
+}
 
 async function waitForTableRowsLoaded() {
   await waitFor(async () => {
