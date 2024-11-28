@@ -143,8 +143,9 @@ describe('Products Page', () => {
 
       await setNonAdminUser(user);
       await waitForTableRowsLoaded();
-      const [, ...rows] = screen.getAllByRole('row');
-      await clickUpdatePrice(rows[0], user);
+      const productRowIndex = 0;
+      const modal = await openUpdatePriceModal(user, productRowIndex);
+      expect(modal).not.toBeInTheDocument();
       expect(
         screen.getByText('Only admin users can edit the price of a product')
       ).toBeInTheDocument();
@@ -291,6 +292,24 @@ async function clickUpdatePrice(row: HTMLElement, user: UserEvent) {
   const updatePriceButton = screen.getByText('Update price');
   expect(updatePriceButton).toBeInTheDocument();
   await user.click(updatePriceButton);
+}
+
+async function openUpdatePriceModal(
+  user: UserEvent,
+  rowIndex: number
+): Promise<HTMLElement | null> {
+  const [, ...rows] = screen.getAllByRole('row');
+  const rowActionControl = within(rows[rowIndex]).getByRole('menuitem');
+  await user.click(rowActionControl);
+  const updatePriceButton = await screen.findByRole('menuitem', { name: /update price/i });
+  await user.click(updatePriceButton);
+  let modal: HTMLElement | null;
+  try {
+    modal = await screen.findByRole('dialog');
+  } catch {
+    modal = null;
+  }
+  return modal;
 }
 
 async function setNonAdminUser(user: UserEvent) {
