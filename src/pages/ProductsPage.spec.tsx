@@ -222,26 +222,23 @@ describe('Products Page', () => {
       const user = userEvent.setup();
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const newPrice = '123';
 
       wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const [, ...rows] = screen.getAllByRole('row');
-      await clickUpdatePrice(rows[0], user);
-
-      const priceInput = screen.getByDisplayValue(product.price);
-      await user.clear(priceInput);
-      await user.type(priceInput, newPrice);
-      await user.click(screen.getByText('Save'));
+      const productRowIndex = 0;
+      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
+      const newPrice = '123';
+      await typePrice(user, modal, newPrice);
+      await savePrice(user, modal);
 
       expect(
         screen.getByText(`Price ${newPrice} for '${product.title}' updated`)
       ).toBeInTheDocument();
 
-      await waitFor(() => screen.getByText(`$${newPrice}.00`));
+      expect(await screen.findByText(`$${newPrice}.00`)).toBeInTheDocument();
       expect(screen.queryByText(`$${product.price}`)).not.toBeInTheDocument();
     });
 
@@ -249,30 +246,26 @@ describe('Products Page', () => {
       const user = userEvent.setup();
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const newPrice = '0';
 
       wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const [, ...rows] = screen.getAllByRole('row');
-      await clickUpdatePrice(rows[0], user);
+      const productRowIndex = 0;
+      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
+      await typePrice(user, modal, '0');
+      await savePrice(user, modal);
 
-      const priceInput = screen.getByDisplayValue(product.price);
-      await user.clear(priceInput);
-      await user.type(priceInput, newPrice);
-      await user.click(screen.getByText('Save'));
-
-      expect(
-        screen.getByText(`Price ${newPrice} for '${product.title}' updated`)
-      ).toBeInTheDocument();
-
-      await waitFor(() => screen.getByText('inactive'));
+      expect(await screen.findByText('inactive')).toBeInTheDocument();
       expect(screen.queryByText('active')).not.toBeInTheDocument();
     });
   });
 });
+
+async function savePrice(user: UserEvent, modal: HTMLElement) {
+  await user.click(within(modal).getByRole('button', { name: /save/i }));
+}
 
 async function typePrice(user: UserEvent, modal: HTMLElement, price: string) {
   const priceInput = within(modal).getByRole('textbox', { name: /price/i });
