@@ -178,14 +178,10 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const [, ...rows] = screen.getAllByRole('row');
-      await clickUpdatePrice(rows[0], user);
-
-      const priceInput = screen.getByDisplayValue(product.price);
-      await user.clear(priceInput);
-      await user.type(priceInput, 'kkk');
-
-      expect(screen.getByText('Only numbers are allowed')).toBeInTheDocument();
+      const productRowIndex = 0;
+      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
+      await typePrice(user, modal, 'non-numeric');
+      expect(await within(modal).findByText('Only numbers are allowed')).toBeInTheDocument();
     });
 
     it('Should display an error message if tries to type a point without decimal places', async () => {
@@ -198,14 +194,10 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const [, ...rows] = screen.getAllByRole('row');
-      await clickUpdatePrice(rows[0], user);
-
-      const priceInput = screen.getByDisplayValue(product.price);
-      await user.clear(priceInput);
-      await user.type(priceInput, '1.');
-
-      expect(screen.getByText('Invalid price format')).toBeInTheDocument();
+      const productRowIndex = 0;
+      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
+      await typePrice(user, modal, '1.');
+      expect(await within(modal).findByText('Invalid price format')).toBeInTheDocument();
     });
 
     it('Should display an error message if tries to type a number bigger than 999.99', async () => {
@@ -218,14 +210,12 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const [, ...rows] = screen.getAllByRole('row');
-      await clickUpdatePrice(rows[0], user);
-
-      const priceInput = screen.getByDisplayValue(product.price);
-      await user.clear(priceInput);
-      await user.type(priceInput, '1000');
-
-      expect(screen.getByText('The max possible price is 999.99')).toBeInTheDocument();
+      const productRowIndex = 0;
+      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
+      await typePrice(user, modal, '1000');
+      expect(
+        await within(modal).findByText('The max possible price is 999.99')
+      ).toBeInTheDocument();
     });
 
     it('Should update the price if the input value is correct', async () => {
@@ -283,6 +273,12 @@ describe('Products Page', () => {
     });
   });
 });
+
+async function typePrice(user: UserEvent, modal: HTMLElement, price: string) {
+  const priceInput = within(modal).getByRole('textbox', { name: /price/i });
+  await user.clear(priceInput);
+  await user.type(priceInput, price);
+}
 
 async function clickUpdatePrice(row: HTMLElement, user: UserEvent) {
   const actionsControl = within(row).getByLabelText('more');
