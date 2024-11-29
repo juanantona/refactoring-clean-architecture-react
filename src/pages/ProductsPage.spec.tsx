@@ -163,11 +163,9 @@ describe('Products Page', () => {
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
-      const [, ...rows] = screen.getAllByRole('row');
-      await clickUpdatePrice(rows[0], user);
-
-      const priceInput = screen.queryByDisplayValue(product.price);
-      expect(priceInput).toBeInTheDocument();
+      const productRowIndex = 0;
+      const modal = await openUpdatePriceModal(user, productRowIndex);
+      verifyModal(modal, product);
     });
 
     it('Should display an error message if tries to use letters in the price input', async () => {
@@ -310,6 +308,16 @@ async function openUpdatePriceModal(
     modal = null;
   }
   return modal;
+}
+
+async function verifyModal(modal: HTMLElement | null, product: Product) {
+  expect(modal).toBeInTheDocument();
+  if (modal) {
+    expect(within(modal).getByText(product.title)).toBeInTheDocument();
+    const img = within(modal).getByRole('img') as HTMLImageElement;
+    expect(img.src).toBe(product.image);
+    expect(within(modal).getByDisplayValue(product.price)).toBeInTheDocument();
+  }
 }
 
 async function setNonAdminUser(user: UserEvent) {
