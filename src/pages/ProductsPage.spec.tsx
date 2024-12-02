@@ -176,6 +176,7 @@ describe('Products Page', () => {
       const productRowIndex = 0;
       const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
       await typePrice(user, modal, 'non-numeric');
+      await verifySaveButtonIsDisabled(modal);
       expect(await within(modal).findByText('Only numbers are allowed')).toBeInTheDocument();
     });
 
@@ -189,6 +190,7 @@ describe('Products Page', () => {
       const productRowIndex = 0;
       const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
       await typePrice(user, modal, '1.');
+      await verifySaveButtonIsDisabled(modal);
       expect(await within(modal).findByText('Invalid price format')).toBeInTheDocument();
     });
 
@@ -202,6 +204,7 @@ describe('Products Page', () => {
       const productRowIndex = 0;
       const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
       await typePrice(user, modal, '1000');
+      await verifySaveButtonIsDisabled(modal);
       expect(
         await within(modal).findByText('The max possible price is 999.99')
       ).toBeInTheDocument();
@@ -243,6 +246,11 @@ describe('Products Page', () => {
     });
   });
 });
+
+async function verifySaveButtonIsDisabled(modal: HTMLElement) {
+  const saveButton = within(modal).getByRole('button', { name: /save/i });
+  expect(saveButton).toBeDisabled();
+}
 
 async function verifyRowStatus(rowIndex: number, status: string) {
   const [, ...rows] = await screen.findAllByRole('row');
