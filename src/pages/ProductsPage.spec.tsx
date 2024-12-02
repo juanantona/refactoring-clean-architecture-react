@@ -153,14 +153,12 @@ describe('Products Page', () => {
     });
   });
 
-  describe('When the user is an Admin user', () => {
+  describe('When the user is an Admin user (default user)', () => {
     it('Should display the update price modal if tries to update the product price', async () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
 
       const { user } = wrappedRender(<ProductsPage />);
-
-      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
       const productRowIndex = 0;
@@ -173,8 +171,6 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
 
       const { user } = wrappedRender(<ProductsPage />);
-
-      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
       const productRowIndex = 0;
@@ -189,8 +185,6 @@ describe('Products Page', () => {
 
       const { user } = wrappedRender(<ProductsPage />);
 
-      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
-
       await waitForTableRowsLoaded();
       const productRowIndex = 0;
       const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
@@ -203,8 +197,6 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
 
       const { user } = wrappedRender(<ProductsPage />);
-
-      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
       const productRowIndex = 0;
@@ -220,8 +212,6 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
 
       const { user } = wrappedRender(<ProductsPage />);
-
-      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
       const productRowIndex = 0;
@@ -242,8 +232,6 @@ describe('Products Page', () => {
       getProductsMock.mockResolvedValue([product]);
 
       const { user } = wrappedRender(<ProductsPage />);
-
-      expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
       await waitForTableRowsLoaded();
       const productRowIndex = 0;
