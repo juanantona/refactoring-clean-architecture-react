@@ -38,7 +38,10 @@ const oneProduct = (productData?: {
 //  - Si el precio es mayor que cero se muestra la etiqueta active en verde
 
 const wrappedRender = (component: React.ReactElement) => {
-  return render(component, { wrapper: AppProvider });
+  return {
+    user: userEvent.setup(),
+    ...render(component, { wrapper: AppProvider }),
+  };
 };
 
 describe('Products Page', () => {
@@ -123,9 +126,8 @@ describe('Products Page', () => {
     it('Should be able to change the user type', async () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const user = userEvent.setup();
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       expect(screen.queryByText('User: Non admin user')).not.toBeInTheDocument();
       await setNonAdminUser(user);
@@ -137,9 +139,8 @@ describe('Products Page', () => {
     it('Should display an error message if tries to update the product price', async () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const user = userEvent.setup();
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       await setNonAdminUser(user);
       await waitForTableRowsLoaded();
@@ -156,9 +157,8 @@ describe('Products Page', () => {
     it('Should display the update price modal if tries to update the product price', async () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const user = userEvent.setup();
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -171,9 +171,8 @@ describe('Products Page', () => {
     it('Should display an error message if tries to use letters in the price input', async () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const user = userEvent.setup();
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -187,9 +186,8 @@ describe('Products Page', () => {
     it('Should display an error message if tries to type a point without decimal places', async () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const user = userEvent.setup();
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -203,9 +201,8 @@ describe('Products Page', () => {
     it('Should display an error message if tries to type a number bigger than 999.99', async () => {
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
-      const user = userEvent.setup();
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -219,11 +216,10 @@ describe('Products Page', () => {
     });
 
     it('Should update the price if the input value is correct and display a success message', async () => {
-      const user = userEvent.setup();
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
@@ -242,11 +238,10 @@ describe('Products Page', () => {
     });
 
     it('Should update the status tag to inactive if the new price is 0', async () => {
-      const user = userEvent.setup();
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
 
-      wrappedRender(<ProductsPage />);
+      const { user } = wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('User: Admin user')).toBeInTheDocument();
 
