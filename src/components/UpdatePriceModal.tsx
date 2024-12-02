@@ -46,6 +46,7 @@ export const UpdatePriceModal = (props: Props): React.ReactElement => {
       title={'Update price'}
       onSave={saveEditPrice}
       onCancel={cancelEditPrice}
+      disableSave={Boolean(priceError)}
     >
       <Stack direction="row">
         <Box width={250}>
