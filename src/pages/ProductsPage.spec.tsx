@@ -241,7 +241,7 @@ describe('Products Page', () => {
       await verifyRowPrice(productRowIndex, newPrice);
     });
 
-    it('Should update the status tag to inactive if the updated price is 0', async () => {
+    it('Should update the status tag to inactive if the new price is 0', async () => {
       const user = userEvent.setup();
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
@@ -256,11 +256,17 @@ describe('Products Page', () => {
       await typePrice(user, modal, '0');
       await savePrice(user, modal);
 
-      expect(await screen.findByText('inactive')).toBeInTheDocument();
-      expect(screen.queryByText('active')).not.toBeInTheDocument();
+      await verifyRowStatus(productRowIndex, 'inactive');
     });
   });
 });
+
+async function verifyRowStatus(rowIndex: number, status: string) {
+  const [, ...rows] = await screen.findAllByRole('row');
+  const rowCells = within(rows[rowIndex]).getAllByRole('cell');
+  const priceCell = rowCells[4];
+  expect(within(priceCell).getByText(status)).toBeInTheDocument();
+}
 
 async function verifyRowPrice(rowIndex: number, price: string) {
   const [, ...rows] = await screen.findAllByRole('row');
