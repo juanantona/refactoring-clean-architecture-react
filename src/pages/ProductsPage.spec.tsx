@@ -218,7 +218,7 @@ describe('Products Page', () => {
       ).toBeInTheDocument();
     });
 
-    it('Should update the price if the input value is correct', async () => {
+    it('Should update the price if the input value is correct and display a success message', async () => {
       const user = userEvent.setup();
       const product = oneProduct();
       getProductsMock.mockResolvedValue([product]);
@@ -235,11 +235,10 @@ describe('Products Page', () => {
       await savePrice(user, modal);
 
       expect(
-        screen.getByText(`Price ${newPrice} for '${product.title}' updated`)
+        await screen.findByText(`Price ${newPrice} for '${product.title}' updated`)
       ).toBeInTheDocument();
 
-      expect(await screen.findByText(`$${newPrice}.00`)).toBeInTheDocument();
-      expect(screen.queryByText(`$${product.price}`)).not.toBeInTheDocument();
+      await verifyRowPrice(productRowIndex, newPrice);
     });
 
     it('Should update the status tag to inactive if the updated price is 0', async () => {
@@ -262,6 +261,13 @@ describe('Products Page', () => {
     });
   });
 });
+
+async function verifyRowPrice(rowIndex: number, price: string) {
+  const [, ...rows] = await screen.findAllByRole('row');
+  const rowCells = within(rows[rowIndex]).getAllByRole('cell');
+  const priceCell = rowCells[3];
+  expect(within(priceCell).getByText(`$${Number(price).toFixed(2)}`)).toBeInTheDocument();
+}
 
 async function savePrice(user: UserEvent, modal: HTMLElement) {
   await user.click(within(modal).getByRole('button', { name: /save/i }));
