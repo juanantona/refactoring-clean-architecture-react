@@ -322,10 +322,10 @@ async function verifyModal(modal: HTMLElement | null, product: Product) {
 }
 
 async function setNonAdminUser(user: UserEvent) {
-  const userButton = screen.getByText('User:', { exact: false });
+  const userButton = screen.getByRole('button', { name: /user:/i });
   await user.click(userButton);
-  expect(screen.getByText('Non admin user')).toBeVisible();
-  await user.click(screen.getByText('Non admin user'));
+  const nonAdminUserButton = await screen.findByRole('menuitem', { name: /non admin user/i });
+  await user.click(nonAdminUserButton);
 }
 
 async function waitForTableRowsLoaded() {
