@@ -274,14 +274,6 @@ async function typePriceWithinModal(
   await user.type(priceInput, price);
 }
 
-async function clickUpdatePrice(row: HTMLElement, user: UserEvent) {
-  const actionsControl = within(row).getByLabelText('more');
-  await user.click(actionsControl);
-  const updatePriceButton = screen.getByText('Update price');
-  expect(updatePriceButton).toBeInTheDocument();
-  await user.click(updatePriceButton);
-}
-
 async function openUpdatePriceModalForRow(
   rowIndex: number,
   { user }: { user: UserEvent }
