@@ -73,7 +73,7 @@ describe('Products Page', () => {
     });
   });
 
-  describe('When there is no available products', () => {
+  describe('When there are no available products', () => {
     it('Should display just the header of the table with the proper column names', async () => {
       getProductsMock.mockResolvedValue([]);
 
@@ -94,7 +94,7 @@ describe('Products Page', () => {
     });
   });
 
-  describe('When there are products available ', () => {
+  describe('When there are available products  ', () => {
     it('Should display each row with the proper data', async () => {
       const productOne = oneProduct({ id: 1 });
       const productTwo = oneProduct({ id: 2 });
