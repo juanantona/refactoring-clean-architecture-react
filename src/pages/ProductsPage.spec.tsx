@@ -67,9 +67,7 @@ describe('Products Page', () => {
       wrappedRender(<ProductsPage />);
 
       expect(screen.getByText('Refactoring a Clean Architecture in React')).toBeInTheDocument();
-      await act(async () => {
-        await getProductsMock();
-      });
+      await act(async () => await getProductsMock());
     });
   });
 
@@ -129,9 +127,9 @@ describe('Products Page', () => {
 
       const { user } = wrappedRender(<ProductsPage />);
 
-      expect(screen.queryByText('User: Non admin user')).not.toBeInTheDocument();
+      expect(screen.queryByText(/user: non admin user/i)).not.toBeInTheDocument();
       await setNonAdminUser(user);
-      expect(screen.getByText('User: Non admin user')).toBeInTheDocument();
+      expect(screen.getByText(/user: non admin user/i, { exact: false })).toBeInTheDocument();
     });
   });
 
