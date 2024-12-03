@@ -144,8 +144,7 @@ describe('Products Page', () => {
 
       await setNonAdminUser(user);
       await waitForTableRowsLoaded();
-      const productRowIndex = 0;
-      const modal = await openUpdatePriceModal(user, productRowIndex);
+      const modal = await openUpdatePriceModalForRow(0, { user });
       expect(modal).not.toBeInTheDocument();
       expect(
         screen.getByText('Only admin users can edit the price of a product')
@@ -161,8 +160,7 @@ describe('Products Page', () => {
       const { user } = wrappedRender(<ProductsPage />);
 
       await waitForTableRowsLoaded();
-      const productRowIndex = 0;
-      const modal = await openUpdatePriceModal(user, productRowIndex);
+      const modal = await openUpdatePriceModalForRow(0, { user });
       verifyModal(modal, product);
     });
 
@@ -173,10 +171,10 @@ describe('Products Page', () => {
       const { user } = wrappedRender(<ProductsPage />);
 
       await waitForTableRowsLoaded();
-      const productRowIndex = 0;
-      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
-      await typePrice(user, modal, 'non-numeric');
+      const modal = (await openUpdatePriceModalForRow(0, { user })) as HTMLElement;
+      await typePriceWithinModal(modal, 'non-numeric', { user });
       await verifySaveButtonIsDisabled(modal);
+
       expect(await within(modal).findByText('Only numbers are allowed')).toBeInTheDocument();
     });
 
@@ -187,10 +185,10 @@ describe('Products Page', () => {
       const { user } = wrappedRender(<ProductsPage />);
 
       await waitForTableRowsLoaded();
-      const productRowIndex = 0;
-      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
-      await typePrice(user, modal, '1.');
+      const modal = (await openUpdatePriceModalForRow(0, { user })) as HTMLElement;
+      await typePriceWithinModal(modal, '1.', { user });
       await verifySaveButtonIsDisabled(modal);
+
       expect(await within(modal).findByText('Invalid price format')).toBeInTheDocument();
     });
 
@@ -201,10 +199,10 @@ describe('Products Page', () => {
       const { user } = wrappedRender(<ProductsPage />);
 
       await waitForTableRowsLoaded();
-      const productRowIndex = 0;
-      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
-      await typePrice(user, modal, '1000');
+      const modal = (await openUpdatePriceModalForRow(0, { user })) as HTMLElement;
+      await typePriceWithinModal(modal, '1000', { user });
       await verifySaveButtonIsDisabled(modal);
+
       expect(
         await within(modal).findByText('The max possible price is 999.99')
       ).toBeInTheDocument();
@@ -217,17 +215,16 @@ describe('Products Page', () => {
       const { user } = wrappedRender(<ProductsPage />);
 
       await waitForTableRowsLoaded();
-      const productRowIndex = 0;
-      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
+      const modal = (await openUpdatePriceModalForRow(0, { user })) as HTMLElement;
       const newPrice = '123';
-      await typePrice(user, modal, newPrice);
-      await savePrice(user, modal);
+      await typePriceWithinModal(modal, newPrice, { user });
+      await savePriceWithinModal(modal, { user });
 
       expect(
         await screen.findByText(`Price ${newPrice} for '${product.title}' updated`)
       ).toBeInTheDocument();
 
-      await verifyRowPrice(productRowIndex, newPrice);
+      await verifyPriceForRow(0, newPrice);
     });
 
     it('Should update the status tag to inactive if the new price is 0', async () => {
@@ -237,12 +234,11 @@ describe('Products Page', () => {
       const { user } = wrappedRender(<ProductsPage />);
 
       await waitForTableRowsLoaded();
-      const productRowIndex = 0;
-      const modal = (await openUpdatePriceModal(user, productRowIndex)) as HTMLElement;
-      await typePrice(user, modal, '0');
-      await savePrice(user, modal);
+      const modal = (await openUpdatePriceModalForRow(0, { user })) as HTMLElement;
+      await typePriceWithinModal(modal, '0', { user });
+      await savePriceWithinModal(modal, { user });
 
-      await verifyRowStatus(productRowIndex, 'inactive');
+      await verifyStatusForRow(0, 'inactive');
     });
   });
 });
@@ -252,25 +248,29 @@ async function verifySaveButtonIsDisabled(modal: HTMLElement) {
   expect(saveButton).toBeDisabled();
 }
 
-async function verifyRowStatus(rowIndex: number, status: string) {
+async function verifyStatusForRow(rowIndex: number, status: string) {
   const [, ...rows] = await screen.findAllByRole('row');
   const rowCells = within(rows[rowIndex]).getAllByRole('cell');
   const priceCell = rowCells[4];
   expect(within(priceCell).getByText(status)).toBeInTheDocument();
 }
 
-async function verifyRowPrice(rowIndex: number, price: string) {
+async function verifyPriceForRow(rowIndex: number, price: string) {
   const [, ...rows] = await screen.findAllByRole('row');
   const rowCells = within(rows[rowIndex]).getAllByRole('cell');
   const priceCell = rowCells[3];
   expect(within(priceCell).getByText(`$${Number(price).toFixed(2)}`)).toBeInTheDocument();
 }
 
-async function savePrice(user: UserEvent, modal: HTMLElement) {
+async function savePriceWithinModal(modal: HTMLElement, { user }: { user: UserEvent }) {
   await user.click(within(modal).getByRole('button', { name: /save/i }));
 }
 
-async function typePrice(user: UserEvent, modal: HTMLElement, price: string) {
+async function typePriceWithinModal(
+  modal: HTMLElement,
+  price: string,
+  { user }: { user: UserEvent }
+) {
   const priceInput = within(modal).getByRole('textbox', { name: /price/i });
   await user.clear(priceInput);
   await user.type(priceInput, price);
@@ -284,9 +284,9 @@ async function clickUpdatePrice(row: HTMLElement, user: UserEvent) {
   await user.click(updatePriceButton);
 }
 
-async function openUpdatePriceModal(
-  user: UserEvent,
-  rowIndex: number
+async function openUpdatePriceModalForRow(
+  rowIndex: number,
+  { user }: { user: UserEvent }
 ): Promise<HTMLElement | null> {
   const [, ...rows] = screen.getAllByRole('row');
   const rowActionControl = within(rows[rowIndex]).getByRole('menuitem');
