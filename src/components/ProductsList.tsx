@@ -9,8 +9,6 @@ import {
 import styled from '@emotion/styled';
 import { type Product } from '../api/StoreApi';
 import { ProductImage } from '../components/ProductImage';
-import { useAppContext } from '../context/useAppContext';
-import { useFetchProducts } from '../hooks/useFetchProducts';
 
 const baseColumn: Partial<GridColDef<Product>> = {
   disableColumnMenu: true,
@@ -18,14 +16,12 @@ const baseColumn: Partial<GridColDef<Product>> = {
 };
 
 type Props = {
-  reloadKey: string;
+  products: Product[];
   updatingQuantity: (productId: number) => void;
 };
 
 export const ProductsList = (props: Props): React.ReactElement | null => {
-  const { updatingQuantity, reloadKey } = props;
-  const { storeApi } = useAppContext();
-  const products = useFetchProducts(storeApi, reloadKey);
+  const { products, updatingQuantity } = props;
 
   const columns: GridColDef<Product>[] = useMemo(
     () => [

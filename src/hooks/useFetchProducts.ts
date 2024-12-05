@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Product, StoreApi } from '../api/StoreApi';
+import { useReload } from './useReload';
 
-export const useFetchProducts = (storeApi: StoreApi, reloadKey: string) => {
+export const useFetchProducts = (storeApi: StoreApi) => {
+  const [reloadKey, reload] = useReload();
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -13,5 +15,5 @@ export const useFetchProducts = (storeApi: StoreApi, reloadKey: string) => {
     fetchProducts();
   }, [reloadKey, storeApi]);
 
-  return products;
+  return { products, reload };
 };

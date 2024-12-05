@@ -4,16 +4,16 @@ import { MainAppBar } from '../components/MainAppBar';
 
 import { useCallback, useState } from 'react';
 import { useAppContext } from '../context/useAppContext';
-import { useReload } from '../hooks/useReload';
 import { type Product } from '../api/StoreApi';
 import { type Notification, ToastNotification } from '../components/ToastNotification';
 
 import { UpdatePriceModal } from '../components/UpdatePriceModal';
 import { ProductsList } from '../components/ProductsList';
+import { useFetchProducts } from '../hooks/useFetchProducts';
 
 export const ProductsPage: React.FC = () => {
   const { currentUser, storeApi } = useAppContext();
-  const [reloadKey, reload] = useReload();
+  const { products, reload } = useFetchProducts(storeApi);
 
   const [notification, setNotification] = useState<Notification>();
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
@@ -67,7 +67,7 @@ export const ProductsPage: React.FC = () => {
   return (
     <Stack direction="column" sx={{ minHeight: '100vh', overflow: 'scroll' }}>
       <MainAppBar />
-      <ProductsList updatingQuantity={updatingQuantity} reloadKey={reloadKey} />
+      <ProductsList products={products} updatingQuantity={updatingQuantity} />
       <Footer />
 
       <ToastNotification
