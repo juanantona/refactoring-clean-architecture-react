@@ -1,5 +1,5 @@
 import { Container, Typography } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   DataGrid,
   GridActionsCellItem,
@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { type Product } from '../api/StoreApi';
 import { ProductImage } from '../components/ProductImage';
 import { useAppContext } from '../context/useAppContext';
+import { useFetchProducts } from '../hooks/useFetchProducts';
 
 const baseColumn: Partial<GridColDef<Product>> = {
   disableColumnMenu: true,
@@ -21,20 +22,10 @@ type Props = {
   updatingQuantity: (productId: number) => void;
 };
 
-export const ProductsList = (props: Props): React.ReactElement => {
+export const ProductsList = (props: Props): React.ReactElement | null => {
   const { updatingQuantity, reloadKey } = props;
   const { storeApi } = useAppContext();
-
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      const products = await storeApi.getAll();
-      console.debug('Reloading', reloadKey);
-      setProducts(products);
-    }
-    fetchProducts();
-  }, [reloadKey, storeApi]);
+  const products = useFetchProducts(storeApi, reloadKey);
 
   const columns: GridColDef<Product>[] = useMemo(
     () => [
